@@ -17,7 +17,6 @@ public final class ModuleManager {
         MODULES.add(new FlyModule());
         MODULES.add(new NoFallModule());
         MODULES.add(new FullBrightModule());
-        MODULES.add(new ForgeOPModule());
         // Sonraki adimlarda yeni moduller buraya eklenecek.
     }
 

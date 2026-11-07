@@ -97,7 +97,7 @@ public class ClickGuiScreen extends Screen {
         ctx.fill(x, y0 + HEADER_H - 2, x + PANEL_W, y0 + HEADER_H, HEADER_ACCENT);
         ctx.drawTextWithShadow(this.textRenderer, "H I L E S I", x + 10, y0 + 6, TEXT);
         ctx.drawTextWithShadow(this.textRenderer, "Sag Shift ile kapat  •  Surukle", x + 10, y0 + 18, 0xFFD6EAF8);
-        String v = "v0.1.15";
+        String v = "v0.1.16";
         ctx.drawTextWithShadow(this.textRenderer, v, x + PANEL_W - this.textRenderer.getWidth(v) - 10, y0 + 10, 0xFFD6EAF8);
         ctx.drawTextWithShadow(this.textRenderer, "1.21.11", x + PANEL_W - this.textRenderer.getWidth("1.21.11") - 10, y0 + 21, 0xFF9CC3ED);
     }
