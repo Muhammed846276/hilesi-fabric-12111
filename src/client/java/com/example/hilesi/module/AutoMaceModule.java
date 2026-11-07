@@ -69,13 +69,16 @@ public class AutoMaceModule extends Module {
         if (client.currentScreen != null) return;
         if (!client.player.isAlive()) return;
 
-        // 1) Mace'e gec
-        if (maceSwitch) {
-            try { switchToMace(client); } catch (Throwable ignored) {}
-        }
-
         Entity target = findTarget(client);
         if (target == null || !target.isAlive()) return;
+
+        // 1) Ayarlanan blok kalaya girince Mace'e gec
+        if (maceSwitch) {
+            try {
+                double dist = client.player.distanceTo(target);
+                if (dist <= range) switchToMace(client);
+            } catch (Throwable ignored) {}
+        }
 
         if (autoAim) {
             try { aimAt(client, target); } catch (Throwable ignored) {}
