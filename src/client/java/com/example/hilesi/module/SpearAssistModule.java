@@ -196,7 +196,7 @@ public class SpearAssistModule extends Module {
         }
         me.setDeltaMovement(vel);
         try {
-            me.hasImpulse = true;
+            me.hurtMarked = true;
         } catch (Throwable ignored) {}
         try {
             me.fallDistance = 0.0;

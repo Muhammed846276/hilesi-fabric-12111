@@ -5,7 +5,7 @@ import com.example.hilesi.module.KillAuraModule;
 import com.example.hilesi.module.Module;
 import com.example.hilesi.module.ModuleManager;
 import com.example.hilesi.module.SpearAssistModule;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
@@ -88,7 +88,8 @@ public class ClickGuiScreen extends Screen {
     }
 
     @Override
-    public void render(GuiGraphics g, int mouseX, int mouseY, float delta) {
+    public void extractRenderState(GuiGraphicsExtractor g, int mouseX, int mouseY, float delta) {
+        super.extractRenderState(g, mouseX, mouseY, delta);
         g.fill(0, 0, this.width, this.height, OVERLAY);
         // panel
         g.fill(panelX, panelY, panelX + panelW, panelY + panelH, PANEL);
@@ -102,20 +103,19 @@ public class ClickGuiScreen extends Screen {
         drawTop(g);
         drawTabs(g, mouseX, mouseY);
         drawContent(g, mouseX, mouseY);
-        super.render(g, mouseX, mouseY, delta);
     }
 
-    private void drawTop(GuiGraphics g) {
-        g.drawString(this.font, "HILESI MENU", panelX + 16, panelY + 12, TXT, true);
+    private void drawTop(GuiGraphicsExtractor g) {
+        g.text(this.font, "HILESI MENU", panelX + 16, panelY + 12, TXT, true);
         String sub = "Sag Shift: kapat  •  Sekmeli buyuk gorunum";
-        g.drawString(this.font, sub, panelX + 16, panelY + 26, DIM, true);
+        g.text(this.font, sub, panelX + 16, panelY + 26, DIM, true);
         String ver = "v0.1.22+26.1  |  26.1  Fabric";
-        g.drawString(this.font, ver, panelX + panelW - this.font.width(ver) - 14, panelY + 18, MUTED, true);
+        g.text(this.font, ver, panelX + panelW - this.font.width(ver) - 14, panelY + 18, MUTED, true);
     }
 
     private int tabX(int i) { return panelX + PADDING + i * 130; }
 
-    private void drawTabs(GuiGraphics g, int mx, int my) {
+    private void drawTabs(GuiGraphicsExtractor g, int mx, int my) {
         int ty = panelY + TOP_H - TAB_H;
         for (int i = 0; i < tabs.size(); i++) {
             int tx = tabX(i);
@@ -127,12 +127,12 @@ public class ClickGuiScreen extends Screen {
             if (active) g.fill(tx, ty + TAB_H - 4, tx + tw, ty + TAB_H - 2, ACCENT);
             Tab t = tabs.get(i);
             String label = t.name + " (" + t.modules.size() + ")";
-            g.drawString(this.font, label, tx + 10, ty + 11, active ? TXT : DIM, true);
+            g.text(this.font, label, tx + 10, ty + 11, active ? TXT : DIM, true);
         }
         g.fill(panelX + 1, panelY + TOP_H - 1, panelX + panelW - 1, panelY + TOP_H, LINE);
     }
 
-    private void drawContent(GuiGraphics g, int mx, int my) {
+    private void drawContent(GuiGraphicsExtractor g, int mx, int my) {
         if (tabs.isEmpty()) return;
         Tab tab = tabs.get(activeTab);
         int cx = panelX + PADDING;
@@ -155,33 +155,33 @@ public class ClickGuiScreen extends Screen {
         return h;
     }
 
-    private void drawCard(GuiGraphics g, Module m, int x, int y, int mx, int my) {
+    private void drawCard(GuiGraphicsExtractor g, Module m, int x, int y, int mx, int my) {
         int h = cardHeight(m);
         boolean hov = mx >= x && mx <= x + CARD_W && my >= y && my <= y + CARD_HEADER_H;
         g.fill(x, y, x + CARD_W, y + h, CARD);
         g.fill(x, y, x + CARD_W, y + CARD_HEADER_H, hov ? CARD_HOV : CARD);
         box(g, x, y, x + CARD_W, y + h, LINE);
         g.fill(x, y, x + 3, y + h, m.isEnabled() ? ON : 0xFF334155);
-        g.drawString(this.font, m.getName(), x + 12, y + 10, TXT, true);
+        g.text(this.font, m.getName(), x + 12, y + 10, TXT, true);
         drawToggle(g, x + CARD_W - 64, y + 7, m.isEnabled());
 
         int sy = y + CARD_HEADER_H + 4;
         if (m instanceof KillAuraModule k) drawAuraSettings(g, k, x, sy, mx, my);
         else if (m instanceof SpearAssistModule s) drawSpearSettings(g, s, x, sy, mx, my);
         else if (m instanceof FlyModule f) drawFlySettings(g, f, x, sy, mx, my);
-        else g.drawString(this.font, "Ayar yok. Tıkla: ac/kapa", x + 12, sy + 2, MUTED, true);
+        else g.text(this.font, "Ayar yok. Tıkla: ac/kapa", x + 12, sy + 2, MUTED, true);
     }
 
-    private void drawToggle(GuiGraphics g, int x, int y, boolean on) {
+    private void drawToggle(GuiGraphicsExtractor g, int x, int y, boolean on) {
         int w = 52, h = 16;
         g.fill(x, y, x + w, y + h, on ? ON_BG : OFF_BG);
         box(g, x, y, x + w, y + h, on ? ON : OFF);
         String t = on ? "ACIK" : "KAPALI";
         int tw = this.font.width(t);
-        g.drawString(this.font, t, x + (w - tw) / 2, y + 4, on ? ON : OFF, true);
+        g.text(this.font, t, x + (w - tw) / 2, y + 4, on ? ON : OFF, true);
     }
 
-    private void drawAuraSettings(GuiGraphics g, KillAuraModule k, int x, int y, int mx, int my) {
+    private void drawAuraSettings(GuiGraphicsExtractor g, KillAuraModule k, int x, int y, int mx, int my) {
         row(g, mx, my, x, y, "Menzil", String.format("%.1f blok", k.getRange())); y += SET_ROW_H;
         row(g, mx, my, x, y, "CPS", String.valueOf(k.getCps())); y += SET_ROW_H;
         row(g, mx, my, x, y, "FOV", k.getFov() + "°"); y += SET_ROW_H;
@@ -190,7 +190,7 @@ public class ClickGuiScreen extends Screen {
         rowBool(g, mx, my, x, y, "Oto Aim", k.isAutoAim());
     }
 
-    private void drawSpearSettings(GuiGraphics g, SpearAssistModule s, int x, int y, int mx, int my) {
+    private void drawSpearSettings(GuiGraphicsExtractor g, SpearAssistModule s, int x, int y, int mx, int my) {
         row(g, mx, my, x, y, "Min Menzil", String.format("%.0f blok", s.getMinRange())); y += SET_ROW_H;
         row(g, mx, my, x, y, "Max Menzil", String.format("%.0f blok", s.getMaxRange())); y += SET_ROW_H;
         row(g, mx, my, x, y, "Hiz / Itki", String.format("%.2f", s.getBoostSpeed())); y += SET_ROW_H;
@@ -201,32 +201,32 @@ public class ClickGuiScreen extends Screen {
         rowBool(g, mx, my, x, y, "Sadece Oyuncular", s.isPlayersOnly());
     }
 
-    private void drawFlySettings(GuiGraphics g, FlyModule f, int x, int y, int mx, int my) {
+    private void drawFlySettings(GuiGraphicsExtractor g, FlyModule f, int x, int y, int mx, int my) {
         row(g, mx, my, x, y, "Ucus Hizi", String.format("%.2f", f.getFlySpeed())); y += SET_ROW_H;
         row(g, mx, my, x, y, "Hiz", Math.round((f.getFlySpeed() - 0.02f) / 0.18f * 100) + "%"); y += SET_ROW_H;
         rowBool(g, mx, my, x, y, "Double Jump (Space x2)", f.isDoubleJump());
     }
 
-    private void row(GuiGraphics g, int mx, int my, int cardX, int y, String label, String val) {
+    private void row(GuiGraphicsExtractor g, int mx, int my, int cardX, int y, String label, String val) {
         int x1 = cardX + 8, x2 = cardX + CARD_W - 8;
         boolean hov = mx >= x1 && mx <= x2 && my >= y && my <= y + SET_ROW_H - 2;
         g.fill(x1, y, x2, y + SET_ROW_H - 2, hov ? SET_HOV : SET_BG);
-        g.drawString(this.font, label, x1 + 8, y + 5, DIM, true);
+        g.text(this.font, label, x1 + 8, y + 5, DIM, true);
         int vw = this.font.width(val);
-        g.drawString(this.font, val, x2 - vw - 8, y + 5, TXT, true);
+        g.text(this.font, val, x2 - vw - 8, y + 5, TXT, true);
     }
 
-    private void rowBool(GuiGraphics g, int mx, int my, int cardX, int y, String label, boolean on) {
+    private void rowBool(GuiGraphicsExtractor g, int mx, int my, int cardX, int y, String label, boolean on) {
         int x1 = cardX + 8, x2 = cardX + CARD_W - 8;
         boolean hov = mx >= x1 && mx <= x2 && my >= y && my <= y + SET_ROW_H - 2;
         g.fill(x1, y, x2, y + SET_ROW_H - 2, hov ? SET_HOV : SET_BG);
-        g.drawString(this.font, label, x1 + 8, y + 5, DIM, true);
+        g.text(this.font, label, x1 + 8, y + 5, DIM, true);
         String val = on ? "ACIK" : "KAPALI";
         int vw = this.font.width(val);
-        g.drawString(this.font, val, x2 - vw - 8, y + 5, on ? ON : OFF, true);
+        g.text(this.font, val, x2 - vw - 8, y + 5, on ? ON : OFF, true);
     }
 
-    private void box(GuiGraphics g, int x1, int y1, int x2, int y2, int c) {
+    private void box(GuiGraphicsExtractor g, int x1, int y1, int x2, int y2, int c) {
         g.fill(x1, y1, x2, y1 + 1, c);
         g.fill(x1, y2 - 1, x2, y2, c);
         g.fill(x1, y1, x1 + 1, y2, c);
