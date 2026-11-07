@@ -109,7 +109,7 @@ public class ClickGuiScreen extends Screen {
         ctx.drawTextWithShadow(this.textRenderer, "HILESI MENU", panelX + 16, panelY + 12, TXT);
         String sub = "Sag Shift: kapat  •  Sekmeli buyuk gorunum";
         ctx.drawTextWithShadow(this.textRenderer, sub, panelX + 16, panelY + 26, DIM);
-        String ver = "v0.1.22  |  1.21.11  Fabric";
+        String ver = "v0.1.23  |  1.21.11  Fabric";
         ctx.drawTextWithShadow(this.textRenderer, ver, panelX + panelW - this.textRenderer.getWidth(ver) - 14, panelY + 18, MUTED);
     }
 
