@@ -27,7 +27,7 @@ public class HilesiClient implements ClientModInitializer {
                 "key.hilesi.open_menu",
                 InputUtil.Type.KEYSYM,
                 GLFW.GLFW_KEY_RIGHT_SHIFT,
-                "category.hilesi"
+                KeyBinding.Category.MISC
         ));
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {

@@ -2,6 +2,7 @@ package com.example.hilesi.screen;
 
 import com.example.hilesi.module.Module;
 import com.example.hilesi.module.ModuleManager;
+import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.text.Text;
@@ -45,8 +46,10 @@ public class ClickGuiScreen extends Screen {
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (button == 0) { // sol tik
+    public boolean mouseClicked(Click click, boolean doubled) {
+        double mouseX = click.x();
+        double mouseY = click.y();
+        if (click.button() == 0) { // sol tik
             int y = PANEL_Y + HEADER_H + PADDING;
             for (Module module : ModuleManager.getModules()) {
                 if (mouseX >= PANEL_X && mouseX <= PANEL_X + PANEL_W
@@ -57,7 +60,7 @@ public class ClickGuiScreen extends Screen {
                 y += ROW_H;
             }
         }
-        return super.mouseClicked(mouseX, mouseY, button);
+        return super.mouseClicked(click, doubled);
     }
 
     @Override
