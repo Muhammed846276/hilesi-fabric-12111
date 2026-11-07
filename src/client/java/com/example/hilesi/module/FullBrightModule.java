@@ -1,8 +1,8 @@
 package com.example.hilesi.module;
 
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.entity.effect.StatusEffects;
+import net.minecraft.client.Minecraft;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 
 /**
  * FullBright - karanligi aydinlatir (Night Vision + gamma).
@@ -19,11 +19,11 @@ public class FullBrightModule extends Module {
 
     @Override
     protected void onEnable() {
-        MinecraftClient client = MinecraftClient.getInstance();
+        Minecraft client = Minecraft.getInstance();
         try {
             if (client != null && client.options != null) {
                 try {
-                    previousGamma = client.options.getGamma().getValue();
+                    previousGamma = client.options.gamma().get();
                 } catch (Throwable ignored) {
                     previousGamma = 1.0;
                 }
@@ -34,38 +34,38 @@ public class FullBrightModule extends Module {
 
     @Override
     protected void onDisable() {
-        MinecraftClient client = MinecraftClient.getInstance();
+        Minecraft client = Minecraft.getInstance();
         try {
             if (client != null && client.player != null) {
-                client.player.removeStatusEffect(StatusEffects.NIGHT_VISION);
+                client.player.removeEffect(MobEffects.NIGHT_VISION);
             }
         } catch (Throwable ignored) {}
         try {
             if (client != null && client.options != null) {
-                client.options.getGamma().setValue(previousGamma);
+                client.options.gamma().set(previousGamma);
             }
         } catch (Throwable ignored) {}
     }
 
     @Override
-    public void onTick(MinecraftClient client) {
+    public void onTick(Minecraft client) {
         if (!isEnabled() || client == null) return;
         apply(client);
     }
 
-    private void apply(MinecraftClient client) {
+    private void apply(Minecraft client) {
         try {
             if (client.options != null) {
-                client.options.getGamma().setValue(16.0);
+                client.options.gamma().set(16.0);
             }
         } catch (Throwable ignored) {}
         try {
             if (client.player == null || !client.player.isAlive()) return;
-            StatusEffectInstance current = client.player.getStatusEffect(StatusEffects.NIGHT_VISION);
+            MobEffectInstance current = client.player.getEffect(MobEffects.NIGHT_VISION);
             if (current == null || current.getDuration() < NIGHT_VISION_DURATION / 2) {
-                // ambient=true, showParticles=false, showIcon=false
-                client.player.addStatusEffect(new StatusEffectInstance(
-                        StatusEffects.NIGHT_VISION,
+                // ambient=true, visible=false, showIcon=false
+                client.player.addEffect(new MobEffectInstance(
+                        MobEffects.NIGHT_VISION,
                         NIGHT_VISION_DURATION,
                         0,
                         true,

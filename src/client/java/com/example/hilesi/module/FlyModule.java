@@ -1,6 +1,6 @@
 package com.example.hilesi.module;
 
-import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.Minecraft;
 
 /**
  * Fly - survival modda ucmayi deneme (sadece kendi oyunun / offline)
@@ -36,28 +36,28 @@ public class FlyModule extends Module {
 
     @Override
     protected void onEnable() {
-        MinecraftClient client = MinecraftClient.getInstance();
+        Minecraft client = Minecraft.getInstance();
         apply(client);
     }
 
     @Override
     protected void onDisable() {
-        MinecraftClient client = MinecraftClient.getInstance();
+        Minecraft client = Minecraft.getInstance();
         try {
             if (client != null && client.player != null) {
-                client.player.getAbilities().allowFlying = false;
+                client.player.getAbilities().mayfly = false;
                 client.player.getAbilities().flying = false;
-                client.player.getAbilities().setFlySpeed(0.05f);
+                client.player.getAbilities().setFlyingSpeed(0.05f);
             }
         } catch (Throwable ignored) {}
     }
 
     @Override
-    public void onTick(MinecraftClient client) {
+    public void onTick(Minecraft client) {
         if (client == null || client.player == null) return;
-        if (doubleJump && client.currentScreen == null) {
+        if (doubleJump && client.screen == null) {
             try {
-                boolean jump = client.options.jumpKey.isPressed();
+                boolean jump = client.options.keyJump.isDown();
                 long now = System.currentTimeMillis();
                 if (jump && !jumpWasPressed) {
                     if (waitingSecond && (now - firstJumpMs) <= DOUBLE_TAP_MS) {
@@ -76,16 +76,16 @@ public class FlyModule extends Module {
         }
         if (!isEnabled()) return;
         if (!client.player.isAlive()) return;
-        if (client.player.isGliding() || client.player.isSubmergedInWater() || client.player.isInLava()) return;
+        if (client.player.isFallFlying() || client.player.isInWater() || client.player.isInLava()) return;
         apply(client);
     }
 
-    private void apply(MinecraftClient client) {
+    private void apply(Minecraft client) {
         try {
             if (client.player == null) return;
-            client.player.getAbilities().allowFlying = true;
+            client.player.getAbilities().mayfly = true;
             client.player.getAbilities().flying = true;
-            client.player.getAbilities().setFlySpeed(flySpeed);
+            client.player.getAbilities().setFlyingSpeed(flySpeed);
         } catch (Throwable ignored) {}
     }
 }

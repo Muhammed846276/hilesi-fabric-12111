@@ -1,16 +1,15 @@
 package com.example.hilesi.module;
 
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.Hand;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.client.Minecraft;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.phys.Vec3;
 
 /**
- * Kill Aura - otomatik saldiri + oto aim (Adim C)
- * Menzil / FOV / CPS kontrolleriyle en yakin hedefe vurur,
- * oto aim aciksa hedefe doner. Sadece kendi oyunun / offline test icin.
+ * Kill Aura - otomatik saldiri + oto aim
+ * Sadece kendi oyunun / offline test icin.
  */
 public class KillAuraModule extends Module {
 
@@ -57,9 +56,9 @@ public class KillAuraModule extends Module {
     protected void onDisable() {}
 
     @Override
-    public void onTick(MinecraftClient client) {
-        if (!isEnabled() || client == null || client.player == null || client.world == null) return;
-        if (client.currentScreen != null) return;
+    public void onTick(Minecraft client) {
+        if (!isEnabled() || client == null || client.player == null || client.level == null) return;
+        if (client.screen != null) return;
         if (!client.player.isAlive()) return;
 
         Entity target = findTarget(client);
@@ -75,55 +74,54 @@ public class KillAuraModule extends Module {
         long minDelay = (long) (1000.0 / Math.max(1, cps));
         if (now - lastAttackMs < minDelay) return;
         try {
-            if (client.player.getAttackCooldownProgress(0.5f) < 1.0f) return;
+            if (client.player.getAttackStrengthScale(0.5f) < 1.0f) return;
         } catch (Throwable ignored) {}
 
         try {
-            if (client.interactionManager == null) return;
-            client.interactionManager.attackEntity(client.player, target);
-            client.player.swingHand(Hand.MAIN_HAND);
+            if (client.gameMode == null) return;
+            client.gameMode.attack(client.player, target);
+            client.player.swing(InteractionHand.MAIN_HAND);
             lastAttackMs = now;
         } catch (Throwable ignored) {}
     }
 
-    private void aimAt(MinecraftClient client, Entity target) {
-        PlayerEntity me = client.player;
-        Vec3d eye = me.getEyePos();
-        double dx = target.getX() - eye.getX();
-        double dy = (target.getY() + target.getHeight() * 0.5) - eye.getY();
-        double dz = target.getZ() - eye.getZ();
+    private void aimAt(Minecraft client, Entity target) {
+        Player me = client.player;
+        Vec3 eye = me.getEyePosition();
+        double dx = target.getX() - eye.x;
+        double dy = (target.getY() + target.getBbHeight() * 0.5) - eye.y;
+        double dz = target.getZ() - eye.z;
         double horizontal = Math.sqrt(dx * dx + dz * dz);
         if (horizontal < 1e-4 && Math.abs(dy) < 1e-4) return;
         float yaw = (float) Math.toDegrees(Math.atan2(-dx, dz));
         float pitch = (float) Math.toDegrees(-Math.atan2(dy, horizontal));
-        me.setYaw(yaw);
-        me.setPitch(pitch);
+        try { me.setYRot(yaw); } catch (Throwable ignored) {}
+        try { me.setXRot(pitch); } catch (Throwable ignored) {}
+        try { me.setYHeadRot(yaw); } catch (Throwable ignored) {}
     }
 
-    private Entity findTarget(MinecraftClient client) {
-        PlayerEntity me = client.player;
+    private Entity findTarget(Minecraft client) {
+        Player me = client.player;
         double bestDistSq = range * range;
         Entity best = null;
 
-        Vec3d look = null;
+        Vec3 look = null;
         try {
-            look = me.getRotationVec(1.0f).normalize();
+            look = me.getViewVector(1.0f).normalize();
         } catch (Throwable ignored) {}
 
-        // Oto aim aciksa FOV filtresi gevsetilir: once FOV'lu arama,
-        // bulunamazsa FOV'suz en yakin hedef (aim yakala)
         Entity bestAim = null;
         double bestAimDistSq = range * range;
 
-        for (Entity e : client.world.getEntities()) {
+        for (Entity e : client.level.entitiesForRendering()) {
             if (e == null || e == me) continue;
             if (!e.isAlive() || e.isRemoved() || e.isSpectator()) continue;
             if (!(e instanceof LivingEntity)) continue;
             LivingEntity living = (LivingEntity) e;
-            if (living.getHealth() <= 0) continue;
-            if (playersOnly && !(e instanceof PlayerEntity)) continue;
+            try { if (living.getHealth() <= 0) continue; } catch (Throwable ignored) {}
+            if (playersOnly && !(e instanceof Player)) continue;
 
-            double distSq = me.squaredDistanceTo(e);
+            double distSq = me.distanceToSqr(e);
             if (distSq > range * range) continue;
             if (distSq < 0.0001) continue;
 
@@ -133,14 +131,14 @@ public class KillAuraModule extends Module {
             }
 
             if (look != null && fov < 360) {
-                Vec3d to = new Vec3d(
+                Vec3 to = new Vec3(
                         e.getX() - me.getX(),
-                        (e.getY() + e.getHeight() * 0.5) - (me.getY() + me.getHeight() * 0.5),
+                        (e.getY() + e.getBbHeight() * 0.5) - (me.getY() + me.getEyeHeight()),
                         e.getZ() - me.getZ()
                 );
-                if (to.lengthSquared() < 1e-6) continue;
+                if (to.lengthSqr() < 1e-6) continue;
                 to = to.normalize();
-                double dot = clamp(look.dotProduct(to), -1.0, 1.0);
+                double dot = clamp(look.dot(to), -1.0, 1.0);
                 double angleDeg = Math.toDegrees(Math.acos(dot));
                 if (angleDeg > fov / 2.0) continue;
             }

@@ -1,13 +1,13 @@
 package com.example.hilesi.module;
 
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.registry.Registries;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.client.Minecraft;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.phys.Vec3;
 
 /**
  * Spear Assist - mizrak ile sag tiklaninca (10-256 blok arasi hedef varsa)
@@ -60,14 +60,14 @@ public class SpearAssistModule extends Module {
     protected void onDisable() { useWasPressed = false; }
 
     @Override
-    public void onTick(MinecraftClient client) {
-        if (!isEnabled() || client == null || client.player == null || client.world == null) return;
-        if (client.currentScreen != null) return;
+    public void onTick(Minecraft client) {
+        if (!isEnabled() || client == null || client.player == null || client.level == null) return;
+        if (client.screen != null) return;
         if (!client.player.isAlive()) return;
 
         boolean usePressed;
         try {
-            usePressed = client.options.useKey.isPressed();
+            usePressed = client.options.keyUse.isDown();
         } catch (Throwable t) {
             return;
         }
@@ -89,10 +89,10 @@ public class SpearAssistModule extends Module {
         } catch (Throwable ignored) {}
     }
 
-    private boolean holdingSpear(MinecraftClient client) {
+    private boolean holdingSpear(Minecraft client) {
         try {
-            if (isSpear(client.player.getMainHandStack())) return true;
-            if (isSpear(client.player.getOffHandStack())) return true;
+            if (isSpear(client.player.getMainHandItem())) return true;
+            if (isSpear(client.player.getOffhandItem())) return true;
         } catch (Throwable ignored) {}
         return false;
     }
@@ -100,49 +100,49 @@ public class SpearAssistModule extends Module {
     private boolean isSpear(ItemStack stack) {
         if (stack == null || stack.isEmpty()) return false;
         try {
-            Identifier id = Registries.ITEM.getId(stack.getItem());
+            Identifier id = BuiltInRegistries.ITEM.getKey(stack.getItem());
             if (id == null) return false;
             String path = id.getPath();
             if (path == null) return false;
-            // 1.21.11+ spear itemleri (wooden_spear, iron_spear, ..._spear)
+            // spear itemleri (wooden_spear, iron_spear, ..._spear)
             return path.equals("spear") || path.endsWith("_spear");
         } catch (Throwable ignored) {}
         return false;
     }
 
-    private Entity findTarget(MinecraftClient client) {
-        PlayerEntity me = client.player;
+    private Entity findTarget(Minecraft client) {
+        Player me = client.player;
         double minSq = minRange * minRange;
         double maxSq = maxRange * maxRange;
         Entity best = null;
         double bestDistSq = Double.MAX_VALUE;
 
-        Vec3d look = null;
+        Vec3 look = null;
         try {
-            look = me.getRotationVec(1.0f).normalize();
+            look = me.getViewVector(1.0f).normalize();
         } catch (Throwable ignored) {}
 
-        for (Entity e : client.world.getEntities()) {
+        for (Entity e : client.level.entitiesForRendering()) {
             if (e == null || e == me) continue;
             if (!e.isAlive() || e.isRemoved() || e.isSpectator()) continue;
             if (!(e instanceof LivingEntity)) continue;
             LivingEntity living = (LivingEntity) e;
-            if (living.getHealth() <= 0) continue;
-            if (playersOnly && !(e instanceof PlayerEntity)) continue;
+            try { if (living.getHealth() <= 0) continue; } catch (Throwable ignored) {}
+            if (playersOnly && !(e instanceof Player)) continue;
 
-            double distSq = me.squaredDistanceTo(e);
+            double distSq = me.distanceToSqr(e);
             if (distSq < minSq || distSq > maxSq) continue;
 
             // Aci/FOV: 180 = tum yonler (arkasi dahil), <180 = bakis yonu konisi
             if (look != null && fov < 180) {
-                Vec3d to = new Vec3d(
+                Vec3 to = new Vec3(
                         e.getX() - me.getX(),
-                        (e.getY() + e.getHeight() * 0.5) - (me.getY() + me.getStandingEyeHeight()),
+                        (e.getY() + e.getBbHeight() * 0.5) - (me.getY() + me.getEyeHeight()),
                         e.getZ() - me.getZ()
                 );
-                if (to.lengthSquared() < 1e-6) continue;
+                if (to.lengthSqr() < 1e-6) continue;
                 to = to.normalize();
-                double dot = clamp(look.dotProduct(to), -1.0, 1.0);
+                double dot = clamp(look.dot(to), -1.0, 1.0);
                 double angleDeg = Math.toDegrees(Math.acos(dot));
                 if (angleDeg > fov / 2.0) continue;
             }
@@ -150,7 +150,7 @@ public class SpearAssistModule extends Module {
             // Duvar kontrolu: ignoreWalls aciksa yoksay
             if (!ignoreWalls) {
                 try {
-                    if (!me.canSee(e)) continue;
+                    if (!me.hasLineOfSight(e)) continue;
                 } catch (Throwable ignored) {}
             }
 
@@ -162,43 +162,44 @@ public class SpearAssistModule extends Module {
         return best;
     }
 
-    private void aimAt(MinecraftClient client, Entity target) {
-        PlayerEntity me = client.player;
-        Vec3d eye = me.getEyePos();
-        double dx = target.getX() - eye.getX();
-        double dy = (target.getY() + target.getHeight() * 0.5) - eye.getY();
-        double dz = target.getZ() - eye.getZ();
+    private void aimAt(Minecraft client, Entity target) {
+        Player me = client.player;
+        Vec3 eye = me.getEyePosition();
+        double dx = target.getX() - eye.x;
+        double dy = (target.getY() + target.getBbHeight() * 0.5) - eye.y;
+        double dz = target.getZ() - eye.z;
         double horizontal = Math.sqrt(dx * dx + dz * dz);
         if (horizontal < 1e-4 && Math.abs(dy) < 1e-4) return;
         float yaw = (float) Math.toDegrees(Math.atan2(-dx, dz));
         float pitch = (float) Math.toDegrees(-Math.atan2(dy, horizontal));
-        me.setYaw(yaw);
-        me.setPitch(pitch);
+        try { me.setYRot(yaw); } catch (Throwable ignored) {}
+        try { me.setXRot(pitch); } catch (Throwable ignored) {}
+        try { me.setYHeadRot(yaw); } catch (Throwable ignored) {}
     }
 
-    private void boostToward(MinecraftClient client, Entity target, boolean initial) {
-        PlayerEntity me = client.player;
-        Vec3d from = new Vec3d(me.getX(), me.getY() + me.getStandingEyeHeight() * 0.5, me.getZ());
-        Vec3d to = new Vec3d(target.getX(), target.getY() + target.getHeight() * 0.5, target.getZ());
-        Vec3d delta = to.subtract(from);
+    private void boostToward(Minecraft client, Entity target, boolean initial) {
+        Player me = client.player;
+        Vec3 from = new Vec3(me.getX(), me.getY() + me.getEyeHeight() * 0.5, me.getZ());
+        Vec3 to = new Vec3(target.getX(), target.getY() + target.getBbHeight() * 0.5, target.getZ());
+        Vec3 delta = to.subtract(from);
         double len = delta.length();
         if (len < 1e-4) return;
-        Vec3d dir = delta.multiply(1.0 / len);
+        Vec3 dir = delta.scale(1.0 / len);
 
         // Hedefe cok yaklasildiysa asiri itme
         double speed = boostSpeed;
         if (len < minRange) speed = Math.min(speed, 0.8);
-        Vec3d vel = dir.multiply(speed);
+        Vec3 vel = dir.scale(speed);
         // Hafif yukari bilesen: yere takilmayi azalt
-        if (initial || me.isOnGround()) {
-            vel = new Vec3d(vel.x, Math.max(vel.y, 0.12), vel.z);
+        if (initial || me.onGround()) {
+            vel = new Vec3(vel.x, Math.max(vel.y, 0.12), vel.z);
         }
-        me.setVelocity(vel);
+        me.setDeltaMovement(vel);
         try {
-            me.velocityDirty = true;
+            me.hasImpulse = true;
         } catch (Throwable ignored) {}
         try {
-            me.fallDistance = 0.0f;
+            me.fallDistance = 0.0;
         } catch (Throwable ignored) {}
     }
 }

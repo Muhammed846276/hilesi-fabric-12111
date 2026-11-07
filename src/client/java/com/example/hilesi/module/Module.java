@@ -1,6 +1,6 @@
 package com.example.hilesi.module;
 
-import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.Minecraft;
 
 public abstract class Module {
     private final String name;
@@ -36,5 +36,5 @@ public abstract class Module {
 
     protected void onDisable() {}
 
-    public void onTick(MinecraftClient client) {}
+    public void onTick(Minecraft client) {}
 }

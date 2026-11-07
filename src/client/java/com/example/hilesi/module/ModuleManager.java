@@ -1,6 +1,6 @@
 package com.example.hilesi.module;
 
-import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.Minecraft;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -25,7 +25,7 @@ public final class ModuleManager {
         return Collections.unmodifiableList(MODULES);
     }
 
-    public static void onTick(MinecraftClient client) {
+    public static void onTick(Minecraft client) {
         for (Module module : MODULES) {
             try {
                 module.onTick(client);
