@@ -22,7 +22,7 @@ public class ClickGuiScreen extends Screen {
     private static final int SETTING_ROW_H = 14;
     private static final int PADDING = 6;
 
-    private static final int SETTING_COUNT = 5; // KillAura altindaki ayar satiri
+    private static final int SETTING_COUNT = 6; // KillAura altindaki ayar satiri
 
     public ClickGuiScreen() {
         super(Text.literal("Hilesi Menu"));
@@ -81,7 +81,8 @@ public class ClickGuiScreen extends Screen {
                 "CPS: " + k.getCps() + " (1-20)",
                 "FOV: " + k.getFov() + " (30-360)",
                 "Sadece Oyuncular: " + (k.isPlayersOnly() ? "ON" : "OFF"),
-                "Otomatik Hedef: " + (k.isAutoSwitch() ? "ON" : "OFF")
+                "Otomatik Hedef: " + (k.isAutoSwitch() ? "ON" : "OFF"),
+                "Oto Aim: " + (k.isAutoAim() ? "ON" : "OFF")
         };
         for (String line : lines) {
             boolean hovered = mouseX >= PANEL_X && mouseX <= PANEL_X + PANEL_W
@@ -123,6 +124,7 @@ public class ClickGuiScreen extends Screen {
                             case 2 -> k.cycleFov(dir);
                             case 3 -> k.togglePlayersOnly();
                             case 4 -> k.toggleAutoSwitch();
+                            case 5 -> k.toggleAutoAim();
                         }
                         return true;
                     }

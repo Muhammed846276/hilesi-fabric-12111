@@ -14,6 +14,7 @@ public final class ModuleManager {
     public static void init() {
         MODULES.clear();
         MODULES.add(new KillAuraModule());
+        MODULES.add(new FlyModule());
         // Sonraki adimlarda yeni moduller buraya eklenecek.
     }
 
