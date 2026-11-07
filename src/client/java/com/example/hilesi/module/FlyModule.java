@@ -8,14 +8,22 @@ import net.minecraft.client.MinecraftClient;
  */
 public class FlyModule extends Module {
 
-    private float flySpeed = 0.05f;
+    private float flySpeed = 0.05f; // 0.02 - 0.20
 
     public FlyModule() {
         super("Fly");
     }
 
     public float getFlySpeed() { return flySpeed; }
-    public void setFlySpeed(float s) { this.flySpeed = Math.max(0.02f, Math.min(0.2f, s)); }
+    public void setFlySpeed(float s) { this.flySpeed = clamp(s, 0.02f, 0.20f); }
+
+    public void cycleSpeed(int dir) { setFlySpeed(flySpeed + 0.01f * dir); }
+    public void setSpeedPercent(int pct) {
+        float v = 0.02f + (0.20f - 0.02f) * (pct / 100f);
+        setFlySpeed(v);
+    }
+
+    private static float clamp(float v, float min, float max) { return Math.max(min, Math.min(max, v)); }
 
     @Override
     protected void onEnable() {
@@ -46,12 +54,9 @@ public class FlyModule extends Module {
     private void apply(MinecraftClient client) {
         try {
             if (client.player == null) return;
-            // Yaratici modda zaten var; survival'da client izni
             client.player.getAbilities().allowFlying = true;
             client.player.getAbilities().flying = true;
             client.player.getAbilities().setFlySpeed(flySpeed);
-            // fall damage korumasi için abilities kullan (1.21.11 mapping uyumlu)
-            client.player.setVelocity(client.player.getVelocity());
         } catch (Throwable ignored) {}
     }
 }

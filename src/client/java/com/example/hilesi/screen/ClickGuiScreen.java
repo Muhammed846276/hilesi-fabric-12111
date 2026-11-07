@@ -1,5 +1,6 @@
 package com.example.hilesi.screen;
 
+import com.example.hilesi.module.FlyModule;
 import com.example.hilesi.module.KillAuraModule;
 import com.example.hilesi.module.Module;
 import com.example.hilesi.module.ModuleManager;
@@ -22,24 +23,19 @@ public class ClickGuiScreen extends Screen {
     private static final int SETTING_ROW_H = 14;
     private static final int PADDING = 6;
 
-    private static final int SETTING_COUNT = 6; // KillAura altindaki ayar satiri
+    private static final int SETTING_COUNT = 6;
+    private static final int FLY_SETTING_COUNT = 2;
 
     public ClickGuiScreen() {
         super(Text.literal("Hilesi Menu"));
-    }
-
-    private KillAuraModule killAura() {
-        for (Module m : ModuleManager.getModules()) {
-            if (m instanceof KillAuraModule k) return k;
-        }
-        return null;
     }
 
     private int panelHeight() {
         int rows = 0;
         for (Module m : ModuleManager.getModules()) {
             rows += ROW_H;
-            if (m instanceof KillAuraModule) rows += SETTING_COUNT * SETTING_ROW_H;
+            if (m instanceof KillAuraModule) rows += ROW_H + SETTING_COUNT * SETTING_ROW_H;
+            else if (m instanceof FlyModule) rows += ROW_H + FLY_SETTING_COUNT * SETTING_ROW_H;
         }
         return HEADER_H + PADDING + rows + PADDING;
     }
@@ -65,17 +61,17 @@ public class ClickGuiScreen extends Screen {
 
             if (module instanceof KillAuraModule k) {
                 y = renderKillAuraSettings(context, k, y, mouseX, mouseY);
+            } else if (module instanceof FlyModule f) {
+                y = renderFlySettings(context, f, y, mouseX, mouseY);
             }
         }
         super.render(context, mouseX, mouseY, delta);
     }
 
     private int renderKillAuraSettings(DrawContext ctx, KillAuraModule k, int y, int mouseX, int mouseY) {
-        // Sol tik + / sag tik - icin bilgi
         ctx.drawTextWithShadow(this.textRenderer, "--- Ayarlar (sol:+ sag:-) ---",
                 PANEL_X + PADDING + 8, y, 0xFFAAAAAA);
         y += ROW_H;
-
         String[] lines = new String[]{
                 "Menzil: " + String.format("%.1f", k.getRange()) + " (3-8)",
                 "CPS: " + k.getCps() + " (1-20)",
@@ -83,6 +79,24 @@ public class ClickGuiScreen extends Screen {
                 "Sadece Oyuncular: " + (k.isPlayersOnly() ? "ON" : "OFF"),
                 "Otomatik Hedef: " + (k.isAutoSwitch() ? "ON" : "OFF"),
                 "Oto Aim: " + (k.isAutoAim() ? "ON" : "OFF")
+        };
+        for (String line : lines) {
+            boolean hovered = mouseX >= PANEL_X && mouseX <= PANEL_X + PANEL_W
+                    && mouseY >= y - 1 && mouseY <= y + SETTING_ROW_H - 1;
+            if (hovered) ctx.fill(PANEL_X + 4, y - 1, PANEL_X + PANEL_W - 4, y + SETTING_ROW_H - 2, 0x22FFFFFF);
+            ctx.drawTextWithShadow(this.textRenderer, line, PANEL_X + PADDING + 8, y, 0xFFDDDDDD);
+            y += SETTING_ROW_H;
+        }
+        return y;
+    }
+
+    private int renderFlySettings(DrawContext ctx, FlyModule f, int y, int mouseX, int mouseY) {
+        ctx.drawTextWithShadow(this.textRenderer, "--- Fly Ayarlari (sol:+ sag:-) ---",
+                PANEL_X + PADDING + 8, y, 0xFFAAAAAA);
+        y += ROW_H;
+        String[] lines = new String[]{
+                "Ucus Hizi: " + String.format("%.2f", f.getFlySpeed()) + " (0.02-0.20)",
+                "Hiz %: " + Math.round((f.getFlySpeed() - 0.02f) / 0.18f * 100) + "%"
         };
         for (String line : lines) {
             boolean hovered = mouseX >= PANEL_X && mouseX <= PANEL_X + PANEL_W
@@ -113,7 +127,7 @@ public class ClickGuiScreen extends Screen {
             y += ROW_H;
 
             if (module instanceof KillAuraModule k) {
-                y += ROW_H; // baslik satiri
+                y += ROW_H;
                 for (int i = 0; i < SETTING_COUNT; i++) {
                     boolean inSetting = mouseX >= PANEL_X && mouseX <= PANEL_X + PANEL_W
                             && mouseY >= y - 1 && mouseY <= y + SETTING_ROW_H - 1;
@@ -126,6 +140,17 @@ public class ClickGuiScreen extends Screen {
                             case 4 -> k.toggleAutoSwitch();
                             case 5 -> k.toggleAutoAim();
                         }
+                        return true;
+                    }
+                    y += SETTING_ROW_H;
+                }
+            } else if (module instanceof FlyModule f) {
+                y += ROW_H;
+                for (int i = 0; i < FLY_SETTING_COUNT; i++) {
+                    boolean inSetting = mouseX >= PANEL_X && mouseX <= PANEL_X + PANEL_W
+                            && mouseY >= y - 1 && mouseY <= y + SETTING_ROW_H - 1;
+                    if (inSetting) {
+                        f.cycleSpeed(dir);
                         return true;
                     }
                     y += SETTING_ROW_H;
