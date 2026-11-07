@@ -17,6 +17,7 @@ public final class ModuleManager {
         MODULES.add(new FlyModule());
         MODULES.add(new NoFallModule());
         MODULES.add(new AutoMaceModule());
+        MODULES.add(new FullBrightModule());
         // Sonraki adimlarda yeni moduller buraya eklenecek.
     }
 
@@ -26,7 +27,9 @@ public final class ModuleManager {
 
     public static void onTick(MinecraftClient client) {
         for (Module module : MODULES) {
-            module.onTick(client);
+            try {
+                module.onTick(client);
+            } catch (Throwable ignored) {}
         }
     }
 }

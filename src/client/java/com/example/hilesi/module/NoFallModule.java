@@ -3,8 +3,10 @@ package com.example.hilesi.module;
 import net.minecraft.client.MinecraftClient;
 
 /**
- * NoFall - dusme hasarini sifirlar (sadece kendi oyunun / offline)
- * Her tick'te fallDistance sifirlanir.
+ * NoFall - dusme hasarini engeller (v2)
+ * Her tick'te fallDistance sifirlanir + noFallDamage bayragi reflection ile acilir.
+ * Tek oyunculuda tam calisir; sunucuda server tarafi kontrolu atlatmak icin
+ * paket spoof gerekir (su an client-only).
  */
 public class NoFallModule extends Module {
     public NoFallModule() {
@@ -25,12 +27,34 @@ public class NoFallModule extends Module {
         } catch (Throwable ignored) {}
         try {
             if (client.player.isGliding()) return;
-            // Dusme sirasinda asiri hizi kes (su + lava haric)
             if (!client.player.isSubmergedInWater() && !client.player.isInLava()) {
-                if (client.player.getVelocity().getY() < -0.5) {
-                    // Sadece dusme hasarini onlemek icin yeterli;
-                    // hiz kisma eklenmedi
-                }
+                // noFallDamage alanini bul ve ac (varsa)
+                try {
+                    Class<?> entityClass = net.minecraft.entity.Entity.class;
+                    java.lang.reflect.Field f = null;
+                    try {
+                        f = entityClass.getDeclaredField("noFallDamage");
+                    } catch (NoSuchFieldException ex) {
+                        // Yarn'da farklı isim olusuna karsi alternatif ara
+                        for (java.lang.reflect.Field field : entityClass.getDeclaredFields()) {
+                            if (field.getName().toLowerCase().contains("nofall")) {
+                                f = field;
+                                break;
+                            }
+                        }
+                    }
+                    if (f != null) {
+                        f.setAccessible(true);
+                        f.setBoolean(client.player, true);
+                    }
+                } catch (Throwable ignored) {}
+
+                // Fall distance cok buyurse hizi da kes (yere yakinken)
+                try {
+                    if (client.player.fallDistance > 4.0f) {
+                        client.player.fallDistance = 0.0f;
+                    }
+                } catch (Throwable ignored) {}
             }
         } catch (Throwable ignored) {}
     }
