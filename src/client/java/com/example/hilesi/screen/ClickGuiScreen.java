@@ -109,7 +109,7 @@ public class ClickGuiScreen extends Screen {
         g.text(this.font, "HILESI MENU", panelX + 16, panelY + 12, TXT, true);
         String sub = "Sag Shift: kapat  •  Sekmeli buyuk gorunum";
         g.text(this.font, sub, panelX + 16, panelY + 26, DIM, true);
-        String ver = "v0.1.22+26.1  |  26.1  Fabric";
+        String ver = "v0.1.23+26.1  |  26.1  Fabric";
         g.text(this.font, ver, panelX + panelW - this.font.width(ver) - 14, panelY + 18, MUTED, true);
     }
 

@@ -13,12 +13,18 @@ public final class ModuleManager {
 
     public static void init() {
         MODULES.clear();
-        MODULES.add(new KillAuraModule());
-        MODULES.add(new SpearAssistModule());
-        MODULES.add(new FlyModule());
-        MODULES.add(new NoFallModule());
-        MODULES.add(new FullBrightModule());
+        addSafe(new KillAuraModule());
+        addSafe(new SpearAssistModule());
+        addSafe(new FlyModule());
+        addSafe(new NoFallModule());
+        addSafe(new FullBrightModule());
         // Sonraki adimlarda yeni moduller buraya eklenecek.
+    }
+
+    private static void addSafe(Module m) {
+        try {
+            if (m != null) MODULES.add(m);
+        } catch (Throwable ignored) {}
     }
 
     public static List<Module> getModules() {
