@@ -15,6 +15,7 @@ public final class ModuleManager {
         MODULES.clear();
         MODULES.add(new KillAuraModule());
         MODULES.add(new FlyModule());
+        MODULES.add(new NoFallModule());
         // Sonraki adimlarda yeni moduller buraya eklenecek.
     }
 
