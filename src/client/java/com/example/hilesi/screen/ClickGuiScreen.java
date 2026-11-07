@@ -1,6 +1,5 @@
 package com.example.hilesi.screen;
 
-import com.example.hilesi.module.AutoMaceModule;
 import com.example.hilesi.module.FlyModule;
 import com.example.hilesi.module.KillAuraModule;
 import com.example.hilesi.module.Module;
@@ -21,7 +20,6 @@ public class ClickGuiScreen extends Screen {
 
     private static final int AURA_SETTING_COUNT = 6;
     private static final int FLY_SETTING_COUNT = 2;
-    private static final int MACE_SETTING_COUNT = 7;
 
     public ClickGuiScreen() {
         super(Text.literal("Hilesi Menu"));
@@ -33,7 +31,6 @@ public class ClickGuiScreen extends Screen {
             rows += ROW_H;
             if (m instanceof KillAuraModule) rows += ROW_H + AURA_SETTING_COUNT * SETTING_ROW_H;
             else if (m instanceof FlyModule) rows += ROW_H + FLY_SETTING_COUNT * SETTING_ROW_H;
-            else if (m instanceof AutoMaceModule) rows += ROW_H + MACE_SETTING_COUNT * SETTING_ROW_H;
         }
         return HEADER_H + PADDING + rows + PADDING;
     }
@@ -57,7 +54,6 @@ public class ClickGuiScreen extends Screen {
             y += ROW_H;
             if (module instanceof KillAuraModule k) y = renderAura(context, k, y, mouseX, mouseY);
             else if (module instanceof FlyModule f) y = renderFly(context, f, y, mouseX, mouseY);
-            else if (module instanceof AutoMaceModule m) y = renderMace(context, m, y, mouseX, mouseY);
         }
         super.render(context, mouseX, mouseY, delta);
     }
@@ -88,27 +84,6 @@ public class ClickGuiScreen extends Screen {
         String[] lines = {
                 "Ucus Hizi: " + String.format("%.2f", f.getFlySpeed()),
                 "Hiz %: " + Math.round((f.getFlySpeed() - 0.02f) / 0.18f * 100) + "%"
-        };
-        for (String line : lines) {
-            boolean hov = mouseX >= PANEL_X && mouseX <= PANEL_X + PANEL_W && mouseY >= y - 1 && mouseY <= y + SETTING_ROW_H - 1;
-            if (hov) ctx.fill(PANEL_X + 4, y - 1, PANEL_X + PANEL_W - 4, y + SETTING_ROW_H - 2, 0x22FFFFFF);
-            ctx.drawTextWithShadow(this.textRenderer, line, PANEL_X + PADDING + 8, y, 0xFFDDDDDD);
-            y += SETTING_ROW_H;
-        }
-        return y;
-    }
-
-    private int renderMace(DrawContext ctx, AutoMaceModule m, int y, int mouseX, int mouseY) {
-        ctx.drawTextWithShadow(this.textRenderer, "--- Mace Ayarlari (sol:+ sag:-) ---", PANEL_X + PADDING + 8, y, 0xFFAAAAAA);
-        y += ROW_H;
-        String[] lines = {
-                "Menzil: " + String.format("%.1f", m.getRange()) + " (1.0-8.0)",
-                "CPS: " + m.getCps(),
-                "FOV: " + m.getFov(),
-                "Sadece Oyuncular: " + (m.isPlayersOnly() ? "ON" : "OFF"),
-                "Mace'e Gec: " + (m.isMaceSwitch() ? "ON" : "OFF"),
-                "Oto Aim: " + (m.isAutoAim() ? "ON" : "OFF"),
-                "Stun Slam: " + (m.isStunSlam() ? "ON" : "OFF")
         };
         for (String line : lines) {
             boolean hov = mouseX >= PANEL_X && mouseX <= PANEL_X + PANEL_W && mouseY >= y - 1 && mouseY <= y + SETTING_ROW_H - 1;
@@ -153,24 +128,6 @@ public class ClickGuiScreen extends Screen {
                 for (int i = 0; i < FLY_SETTING_COUNT; i++) {
                     boolean inS = mouseX >= PANEL_X && mouseX <= PANEL_X + PANEL_W && mouseY >= y - 1 && mouseY <= y + SETTING_ROW_H - 1;
                     if (inS) { f.cycleSpeed(dir); return true; }
-                    y += SETTING_ROW_H;
-                }
-            } else if (module instanceof AutoMaceModule m) {
-                y += ROW_H;
-                for (int i = 0; i < MACE_SETTING_COUNT; i++) {
-                    boolean inS = mouseX >= PANEL_X && mouseX <= PANEL_X + PANEL_W && mouseY >= y - 1 && mouseY <= y + SETTING_ROW_H - 1;
-                    if (inS) {
-                        switch (i) {
-                            case 0 -> m.cycleRange(dir);
-                            case 1 -> m.cycleCps(dir);
-                            case 2 -> m.cycleFov(dir);
-                            case 3 -> m.togglePlayersOnly();
-                            case 4 -> m.toggleMaceSwitch();
-                            case 5 -> m.toggleAutoAim();
-                            case 6 -> m.toggleStunSlam();
-                        }
-                        return true;
-                    }
                     y += SETTING_ROW_H;
                 }
             }
