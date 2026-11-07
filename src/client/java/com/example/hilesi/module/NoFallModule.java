@@ -22,9 +22,6 @@ public class NoFallModule extends Module {
         if (!client.player.isAlive()) return;
         try {
             client.player.fallDistance = 0.0f;
-            try {
-                client.player.resetFallDistance();
-            } catch (Throwable ignored) {}
         } catch (Throwable ignored) {}
         try {
             if (client.player.isGliding()) return;
