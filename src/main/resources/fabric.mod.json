@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "hilesi",
+  "version": "${version}",
+  "name": "Hilesi",
+  "description": "Adim adim gelistirilen mod menu altyapisi (1.21.11).",
+  "authors": ["User"],
+  "contact": {},
+  "license": "MIT",
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "com.example.hilesi.client.HilesiClient"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=0.20.0",
+    "minecraft": "~1.21.11",
+    "java": ">=21",
+    "fabric-api": "*"
+  }
+}
