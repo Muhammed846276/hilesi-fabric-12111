@@ -1,6 +1,19 @@
 package com.example.hilesi.screen;
 
-import com.example.hilesi.module.*;
+import com.example.hilesi.module.Module;
+import com.example.hilesi.module.ModuleManager;
+import com.example.hilesi.module.KillAuraModule;
+import com.example.hilesi.module.SpearAssistModule;
+import com.example.hilesi.module.FlyModule;
+import com.example.hilesi.module.StepModule;
+import com.example.hilesi.module.SpeedModule;
+import com.example.hilesi.module.TriggerBotModule;
+import com.example.hilesi.module.ReachModule;
+import com.example.hilesi.module.XRayModule;
+import com.example.hilesi.module.VelocityModule;
+import com.example.hilesi.module.TimerModule;
+import com.example.hilesi.module.EspModule;
+import com.example.hilesi.module.ChestStealerModule;
 import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
@@ -157,7 +170,7 @@ public class ClickGuiScreen extends Screen {
             if(m instanceof StepModule s){ s.cycleHeight(dir); return true; }
             if(m instanceof SpeedModule s){ s.cycleMultiplier(dir); return true; }
             if(m instanceof TriggerBotModule t){ if(i==0)t.cycleCps(dir); else t.togglePlayersOnly(); return true; }
-            if(m instanceof ReachModule r){ r.cycleExtra(dir); return true; }
+            if(m instanceof ReachModule rm){ rm.cycleExtra(dir); return true; }
             if(m instanceof XRayModule xr){ xr.toggleCaveMode(); return true; }
             if(m instanceof VelocityModule v){ if(i==0)v.cycleHorizontal(dir); else v.cycleVertical(dir); return true; }
             if(m instanceof TimerModule t){ t.cycleSpeed(dir); return true; }
