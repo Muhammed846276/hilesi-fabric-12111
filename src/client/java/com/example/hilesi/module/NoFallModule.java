@@ -2,11 +2,11 @@ package com.example.hilesi.module;
 
 import net.minecraft.client.MinecraftClient;
 
+import java.lang.reflect.Constructor;
+
 /**
- * NoFall - dusme hasarini engeller (v2)
- * Her tick'te fallDistance sifirlanir + noFallDamage bayragi reflection ile acilir.
- * Tek oyunculuda tam calisir; sunucuda server tarafi kontrolu atlatmak icin
- * paket spoof gerekir (su an client-only).
+ * NoFall - dusme hasarini azaltir/engeller (client-side + ground packet denemesi).
+ * Tek oyunculuda genelde calisir; sunucuda davranis sunucuya baglidir.
  */
 public class NoFallModule extends Module {
     public NoFallModule() {
@@ -23,37 +23,58 @@ public class NoFallModule extends Module {
         if (!isEnabled() || client == null || client.player == null) return;
         if (!client.player.isAlive()) return;
         try {
-            client.player.fallDistance = 0.0f;
+            if (client.player.isGliding() || client.player.getAbilities().flying) return;
         } catch (Throwable ignored) {}
         try {
-            if (client.player.isGliding()) return;
-            if (!client.player.isSubmergedInWater() && !client.player.isInLava()) {
-                // noFallDamage alanini bul ve ac (varsa)
-                try {
-                    Class<?> entityClass = net.minecraft.entity.Entity.class;
-                    java.lang.reflect.Field f = null;
-                    try {
-                        f = entityClass.getDeclaredField("noFallDamage");
-                    } catch (NoSuchFieldException ex) {
-                        // Yarn'da farklı isim olusuna karsi alternatif ara
-                        for (java.lang.reflect.Field field : entityClass.getDeclaredFields()) {
-                            if (field.getName().toLowerCase().contains("nofall")) {
-                                f = field;
-                                break;
-                            }
-                        }
-                    }
-                    if (f != null) {
-                        f.setAccessible(true);
-                        f.setBoolean(client.player, true);
-                    }
-                } catch (Throwable ignored) {}
+            if (client.player.isSubmergedInWater() || client.player.isInLava()) return;
+        } catch (Throwable ignored) {}
 
-                // Fall distance cok buyurse hizi da kes (yere yakinken)
+        try {
+            float fall = client.player.fallDistance;
+            double vy = client.player.getVelocity().y;
+            // Tehlikeli dususte fallDistance'i sifirla ve ground paket dene
+            if (fall > 2.0f || vy < -0.55) {
+                client.player.fallDistance = 0.0f;
+                sendGroundPacket(client);
+            } else if (fall > 0.0f) {
+                client.player.fallDistance = 0.0f;
+            }
+        } catch (Throwable ignored) {}
+    }
+
+    private void sendGroundPacket(MinecraftClient client) {
+        try {
+            if (client.player == null || client.getNetworkHandler() == null) return;
+            boolean horizontal = false;
+            try {
+                horizontal = client.player.horizontalCollision;
+            } catch (Throwable ignored) {}
+
+            Object packet = null;
+            try {
+                Class<?> base = Class.forName("net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket");
+                for (Class<?> inner : base.getDeclaredClasses()) {
+                    if (!"OnGroundOnly".equals(inner.getSimpleName())) continue;
+                    // (boolean onGround, boolean horizontalCollision)
+                    try {
+                        Constructor<?> c = inner.getDeclaredConstructor(boolean.class, boolean.class);
+                        c.setAccessible(true);
+                        packet = c.newInstance(true, horizontal);
+                        break;
+                    } catch (Throwable ignored) {}
+                    // (boolean onGround)
+                    try {
+                        Constructor<?> c = inner.getDeclaredConstructor(boolean.class);
+                        c.setAccessible(true);
+                        packet = c.newInstance(true);
+                        break;
+                    } catch (Throwable ignored) {}
+                }
+            } catch (Throwable ignored) {}
+
+            if (packet != null) {
                 try {
-                    if (client.player.fallDistance > 4.0f) {
-                        client.player.fallDistance = 0.0f;
-                    }
+                    client.getNetworkHandler().sendPacket((net.minecraft.network.packet.Packet<?>) packet);
                 } catch (Throwable ignored) {}
             }
         } catch (Throwable ignored) {}
