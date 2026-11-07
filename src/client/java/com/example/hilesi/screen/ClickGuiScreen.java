@@ -22,7 +22,7 @@ public class ClickGuiScreen extends Screen {
     private static final int FOOTER_H = 18;
 
     private static final int AURA_SETTING_COUNT = 6;
-    private static final int FLY_SETTING_COUNT = 2;
+    private static final int FLY_SETTING_COUNT = 3;
 
     private static final int BG = 0xE6121418;
     private static final int BORDER = 0xFF3A4150;
@@ -97,7 +97,7 @@ public class ClickGuiScreen extends Screen {
         ctx.fill(x, y0 + HEADER_H - 2, x + PANEL_W, y0 + HEADER_H, HEADER_ACCENT);
         ctx.drawTextWithShadow(this.textRenderer, "H I L E S I", x + 10, y0 + 6, TEXT);
         ctx.drawTextWithShadow(this.textRenderer, "Sag Shift ile kapat  •  Surukle", x + 10, y0 + 18, 0xFFD6EAF8);
-        String v = "v0.1.13";
+        String v = "v0.1.14";
         ctx.drawTextWithShadow(this.textRenderer, v, x + PANEL_W - this.textRenderer.getWidth(v) - 10, y0 + 10, 0xFFD6EAF8);
         ctx.drawTextWithShadow(this.textRenderer, "1.21.11", x + PANEL_W - this.textRenderer.getWidth("1.21.11") - 10, y0 + 21, 0xFF9CC3ED);
     }
@@ -153,7 +153,8 @@ public class ClickGuiScreen extends Screen {
         y += ROW_H;
         String[] lines = {
                 "Ucus Hizi:  " + String.format("%.2f", f.getFlySpeed()),
-                "Hiz:  " + Math.round((f.getFlySpeed() - 0.02f) / 0.18f * 100) + "%"
+                "Hiz:  " + Math.round((f.getFlySpeed() - 0.02f) / 0.18f * 100) + "%",
+                "Double Jump:  " + (f.isDoubleJump() ? "ON" : "OFF")
         };
         for (String line : lines) {
             boolean hov = mouseX >= x1 && mouseX <= x2 && mouseY >= y && mouseY <= y + SETTING_ROW_H;
@@ -221,7 +222,11 @@ public class ClickGuiScreen extends Screen {
                 y += ROW_H;
                 for (int i = 0; i < FLY_SETTING_COUNT; i++) {
                     boolean inS = mx >= panelX + 10 && mx <= panelX + PANEL_W - 10 && my >= y && my <= y + SETTING_ROW_H;
-                    if (inS) { f.cycleSpeed(dir); return true; }
+                    if (inS) {
+                        if (i == 2) f.toggleDoubleJump();
+                        else f.cycleSpeed(dir);
+                        return true;
+                    }
                     y += SETTING_ROW_H;
                 }
             }

@@ -4,14 +4,13 @@ import net.minecraft.client.MinecraftClient;
 
 /**
  * Fly - survival modda ucmayi deneme (sadece kendi oyunun / offline)
- * Client tarafindan abilities.allowFlying acilir.
- * Double Jump (Space x2) ile ac/kapa.
+ * Double Jump (Space x2) ile ac/kapa (ayarlanabilir).
  */
 public class FlyModule extends Module {
 
     private float flySpeed = 0.05f; // 0.02 - 0.20
+    private boolean doubleJump = true;
 
-    // Double jump algilama
     private boolean jumpWasPressed = false;
     private long firstJumpMs = 0L;
     private boolean waitingSecond = false;
@@ -23,6 +22,9 @@ public class FlyModule extends Module {
 
     public float getFlySpeed() { return flySpeed; }
     public void setFlySpeed(float s) { this.flySpeed = clamp(s, 0.02f, 0.20f); }
+    public boolean isDoubleJump() { return doubleJump; }
+    public void setDoubleJump(boolean v) { this.doubleJump = v; }
+    public void toggleDoubleJump() { setDoubleJump(!doubleJump); }
 
     public void cycleSpeed(int dir) { setFlySpeed(flySpeed + 0.01f * dir); }
     public void setSpeedPercent(int pct) {
@@ -53,10 +55,7 @@ public class FlyModule extends Module {
     @Override
     public void onTick(MinecraftClient client) {
         if (client == null || client.player == null) return;
-
-        // Double jump: Fly kapaliyken de dinlemeliyiz (acmak icin)
-        // Menü acikken tetiklenmesin
-        if (client.currentScreen == null) {
+        if (doubleJump && client.currentScreen == null) {
             try {
                 boolean jump = client.options.jumpKey.isPressed();
                 long now = System.currentTimeMillis();
@@ -75,7 +74,6 @@ public class FlyModule extends Module {
                 jumpWasPressed = jump;
             } catch (Throwable ignored) {}
         }
-
         if (!isEnabled()) return;
         if (!client.player.isAlive()) return;
         if (client.player.isGliding() || client.player.isSubmergedInWater() || client.player.isInLava()) return;
