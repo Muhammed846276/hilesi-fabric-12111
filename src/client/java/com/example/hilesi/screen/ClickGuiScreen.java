@@ -109,7 +109,7 @@ public class ClickGuiScreen extends Screen {
         ctx.drawTextWithShadow(this.textRenderer, "HILESI MENU", panelX + 16, panelY + 12, TXT);
         String sub = "Sag Shift: kapat  •  Sekmeli buyuk gorunum";
         ctx.drawTextWithShadow(this.textRenderer, sub, panelX + 16, panelY + 26, DIM);
-        String ver = "v0.1.19  |  1.21.11  Fabric";
+        String ver = "v0.1.20  |  1.21.11  Fabric";
         ctx.drawTextWithShadow(this.textRenderer, ver, panelX + panelW - this.textRenderer.getWidth(ver) - 14, panelY + 18, MUTED);
     }
 
@@ -149,7 +149,7 @@ public class ClickGuiScreen extends Screen {
     private int cardHeight(Module m) {
         int h = CARD_HEADER_H + 6;
         if (m instanceof KillAuraModule) h += 6 * SET_ROW_H + 6;
-        else if (m instanceof SpearAssistModule) h += 4 * SET_ROW_H + 6;
+        else if (m instanceof SpearAssistModule) h += 7 * SET_ROW_H + 6;
         else if (m instanceof FlyModule) h += 3 * SET_ROW_H + 6;
         else h += 10;
         return h;
@@ -194,6 +194,10 @@ public class ClickGuiScreen extends Screen {
         row(ctx, mx, my, x, y, "Min Menzil", String.format("%.0f blok", s.getMinRange())); y += SET_ROW_H;
         row(ctx, mx, my, x, y, "Max Menzil", String.format("%.0f blok", s.getMaxRange())); y += SET_ROW_H;
         row(ctx, mx, my, x, y, "Hiz / Itki", String.format("%.2f", s.getBoostSpeed())); y += SET_ROW_H;
+        String fovTxt = s.getFov() >= 180 ? "360 (her yon)" : (s.getFov() + "°");
+        row(ctx, mx, my, x, y, "Aci (90-180)", fovTxt); y += SET_ROW_H;
+        rowBool(ctx, mx, my, x, y, "Aim Kilidi (mouse)", s.isAimLock()); y += SET_ROW_H;
+        rowBool(ctx, mx, my, x, y, "Duvarlari Yoksay", s.isIgnoreWalls()); y += SET_ROW_H;
         rowBool(ctx, mx, my, x, y, "Sadece Oyuncular", s.isPlayersOnly());
     }
 
@@ -271,13 +275,16 @@ public class ClickGuiScreen extends Screen {
                     }
                 }
             } else if (m instanceof SpearAssistModule s) {
-                for (int i = 0; i < 4; i++) {
+                for (int i = 0; i < 7; i++) {
                     if (hitRow(mx, my, cx, sy + i * SET_ROW_H)) {
                         switch (i) {
                             case 0 -> s.cycleMinRange(dir);
                             case 1 -> s.cycleMaxRange(dir);
                             case 2 -> s.cycleBoostSpeed(dir);
-                            case 3 -> s.togglePlayersOnly();
+                            case 3 -> s.cycleFov(dir);
+                            case 4 -> s.toggleAimLock();
+                            case 5 -> s.toggleIgnoreWalls();
+                            case 6 -> s.togglePlayersOnly();
                         }
                         return true;
                     }
