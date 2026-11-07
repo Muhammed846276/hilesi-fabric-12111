@@ -50,8 +50,8 @@ public class FlyModule extends Module {
             client.player.getAbilities().allowFlying = true;
             client.player.getAbilities().flying = true;
             client.player.getAbilities().setFlySpeed(flySpeed);
-            client.player.setFallFlying(false);
-            client.player.noFallDamage = true;
+            // fall damage korumasi için abilities kullan (1.21.11 mapping uyumlu)
+            client.player.setVelocity(client.player.getVelocity());
         } catch (Throwable ignored) {}
     }
 }
