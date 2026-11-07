@@ -7,18 +7,21 @@ public class ChestStealerModule extends Module {
     @Override public void onTick(Minecraft client){
         if(!isEnabled()||client==null||client.player==null||client.gameMode==null) return;
         if(client.screen==null) return;
-        if(!client.screen.getClass().getSimpleName().toLowerCase().contains("container") && !client.screen.getClass().getSimpleName().toLowerCase().contains("chest")) return;
+        String sn = client.screen.getClass().getSimpleName().toLowerCase();
+        if(!sn.contains("container") && !sn.contains("chest") && !sn.contains("shulker")) return;
         long now=System.currentTimeMillis(); if(now-last<delayMs) return;
         try{
             var h=client.player.containerMenu;
             int chestSlots = Math.max(0, h.slots.size()-36);
+            Object quickMove = null;
+            try { for (Object o : net.minecraft.world.inventory.ClickType.values()) if(o.toString().contains("QUICK")) { quickMove=o; break; } } catch(Throwable e){}
             for(int i=0;i<chestSlots;i++){
                 var s=h.getSlot(i);
-                if(s!=null && s.hasItem()){
-                    // handleInventoryMouseClick(containerId, slotId, button, clickType, player)
+                if(s!=null && s.hasItem() && quickMove!=null){
                     for(var mth: client.gameMode.getClass().getMethods()){
-                        if(mth.getName().toLowerCase().contains("handleinventorymouse") || mth.getName().toLowerCase().contains("clickslot")){
-                            try{ mth.invoke(client.gameMode, h.containerId, i, 0, net.minecraft.world.inventory.ClickType.QUICK_MOVE, client.player); last=now; return; }catch(Throwable e){}
+                        String n=mth.getName().toLowerCase();
+                        if(n.contains("handleinventory") || n.contains("click")) {
+                            try{ mth.invoke(client.gameMode, h.containerId, i, 0, quickMove, client.player); last=now; return; }catch(Throwable e){}
                         }
                     }
                     last=now; return;

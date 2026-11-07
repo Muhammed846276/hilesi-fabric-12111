@@ -150,7 +150,7 @@ public class ClickGuiScreen extends Screen {
     @Override public boolean mouseClicked(MouseButtonEvent event, boolean isDoubleClick) {
         double mx=event.x(), my=event.y(); int button=event.button(); int ty=panelY+TOP_H-TAB_H;
         for(int i=0;i<tabs.size();i++){ int tx=tabX(i),tw=112; if(mx>=tx&&mx<=tx+tw&&my>=ty&&my<=ty+TAB_H-2){ activeTab=i; return true; } }
-        if(button!=0&&button!=1||tabs.isEmpty()) return super.mouseClicked(click,doubled);
+        if(button!=0&&button!=1||tabs.isEmpty()) return super.mouseClicked(event,isDoubleClick);
         int dir=(button==0)?1:-1; int cx=panelX+PADDING, cy=panelY+TOP_H+10, maxY=panelY+panelH-10;
         for(Module m: tabs.get(activeTab).modules){
             int h=cardHeight(m); if(cy+h>maxY) break;
@@ -158,7 +158,7 @@ public class ClickGuiScreen extends Screen {
             int sy=cy+CARD_HEADER_H+4; if(handleSettings(m,mx,my,cx,sy,dir)) return true;
             cy+=h+8;
         }
-        return super.mouseClicked(click,doubled);
+        return super.mouseClicked(event,isDoubleClick);
     }
 
     private boolean handleSettings(Module m,double mx,double my,int cx,int sy,int dir){

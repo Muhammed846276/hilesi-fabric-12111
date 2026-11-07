@@ -10,7 +10,8 @@ public class AutoSprintModule extends Module {
         if (client.screen != null) return;
         try {
             boolean fwd = false;
-            try { fwd = client.player.input.forwardImpulse > 0; } catch(Throwable e){ fwd = client.options.keyUp.isDown(); }
+            try { fwd = client.options.keyUp.isDown(); } catch(Throwable e){}
+            try { if (!fwd) fwd = client.player.input.hasForwardImpulse(); } catch(Throwable e){}
             if (fwd && !client.player.isShiftKeyDown()) client.player.setSprinting(true);
         } catch (Throwable ignored) {}
     }
