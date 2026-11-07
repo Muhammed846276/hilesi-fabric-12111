@@ -120,8 +120,8 @@ public class SpearAssistModule extends Module {
 
     private void boostToward(MinecraftClient client, Entity target, boolean initial) {
         PlayerEntity me = client.player;
-        Vec3d from = me.getPos().add(0, me.getStandingEyeHeight() * 0.5, 0);
-        Vec3d to = target.getPos().add(0, target.getHeight() * 0.5, 0);
+        Vec3d from = new Vec3d(me.getX(), me.getY() + me.getStandingEyeHeight() * 0.5, me.getZ());
+        Vec3d to = new Vec3d(target.getX(), target.getY() + target.getHeight() * 0.5, target.getZ());
         Vec3d delta = to.subtract(from);
         double len = delta.length();
         if (len < 1e-4) return;
@@ -136,7 +136,9 @@ public class SpearAssistModule extends Module {
             vel = new Vec3d(vel.x, Math.max(vel.y, 0.12), vel.z);
         }
         me.setVelocity(vel);
-        me.velocityModified = true;
+        try {
+            me.velocityDirty = true;
+        } catch (Throwable ignored) {}
         try {
             me.fallDistance = 0.0f;
         } catch (Throwable ignored) {}
