@@ -10,12 +10,10 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.text.Text;
 
 /**
- * Sag Shift menusu - gorunumlu v2
- * Koyu panel, golge, cerceve, renkli durum noktalari.
+ * Sag Shift menusu - floating (suruklenebilir) v3
+ * Header'i tut surukle, birak.
  */
 public class ClickGuiScreen extends Screen {
-    private static final int PANEL_X = 18;
-    private static final int PANEL_Y = 18;
     private static final int PANEL_W = 260;
     private static final int HEADER_H = 34;
     private static final int ROW_H = 20;
@@ -26,7 +24,6 @@ public class ClickGuiScreen extends Screen {
     private static final int AURA_SETTING_COUNT = 6;
     private static final int FLY_SETTING_COUNT = 2;
 
-    // Renkler (ARGB)
     private static final int BG = 0xE6121418;
     private static final int BORDER = 0xFF3A4150;
     private static final int HEADER_BG = 0xFF1E5BB8;
@@ -40,6 +37,13 @@ public class ClickGuiScreen extends Screen {
     private static final int GREEN = 0xFF22C55E;
     private static final int RED = 0xFFEF4444;
     private static final int BLUE = 0xFF38BDF8;
+
+    // Floating konumu (her acilista sifirlanir)
+    private int panelX = 18;
+    private int panelY = 18;
+    private boolean dragging = false;
+    private int dragOffsetX = 0;
+    private int dragOffsetY = 0;
 
     public ClickGuiScreen() {
         super(Text.literal("Hilesi Menu"));
@@ -58,74 +62,69 @@ public class ClickGuiScreen extends Screen {
 
     @Override
     public void render(DrawContext ctx, int mouseX, int mouseY, float delta) {
+        if (dragging) {
+            panelX = mouseX - dragOffsetX;
+            panelY = mouseY - dragOffsetY;
+        }
         int h = contentHeight();
+        int x = panelX, y0 = panelY;
 
-        // Golge
-        ctx.fill(PANEL_X + 3, PANEL_Y + 4, PANEL_X + PANEL_W + 3, PANEL_Y + h + 4, 0x66000000);
-        // Ana panel
-        ctx.fill(PANEL_X, PANEL_Y, PANEL_X + PANEL_W, PANEL_Y + h, BG);
-        // Cerceve
-        ctx.fill(PANEL_X, PANEL_Y, PANEL_X + PANEL_W, PANEL_Y + 1, BORDER);
-        ctx.fill(PANEL_X, PANEL_Y + h - 1, PANEL_X + PANEL_W, PANEL_Y + h, BORDER);
-        ctx.fill(PANEL_X, PANEL_Y, PANEL_X + 1, PANEL_Y + h, BORDER);
-        ctx.fill(PANEL_X + PANEL_W - 1, PANEL_Y, PANEL_X + PANEL_W, PANEL_Y + h, BORDER);
+        ctx.fill(x + 3, y0 + 4, x + PANEL_W + 3, y0 + h + 4, 0x66000000);
+        ctx.fill(x, y0, x + PANEL_W, y0 + h, BG);
+        ctx.fill(x, y0, x + PANEL_W, y0 + 1, BORDER);
+        ctx.fill(x, y0 + h - 1, x + PANEL_W, y0 + h, BORDER);
+        ctx.fill(x, y0, x + 1, y0 + h, BORDER);
+        ctx.fill(x + PANEL_W - 1, y0, x + PANEL_W, y0 + h, BORDER);
 
         drawHeader(ctx);
-        int y = PANEL_Y + HEADER_H + 2;
+        int y = y0 + HEADER_H + 2;
         for (Module module : ModuleManager.getModules()) {
-            boolean hovered = mouseX >= PANEL_X + 4 && mouseX <= PANEL_X + PANEL_W - 4
+            boolean hovered = mouseX >= x + 4 && mouseX <= x + PANEL_W - 4
                     && mouseY >= y && mouseY <= y + ROW_H;
             drawModuleRow(ctx, module, y, hovered);
             y += ROW_H + 2;
-            if (module instanceof KillAuraModule k) {
-                y = renderAura(ctx, k, y, mouseX, mouseY);
-            } else if (module instanceof FlyModule f) {
-                y = renderFly(ctx, f, y, mouseX, mouseY);
-            } else {
-                y += 4;
-            }
+            if (module instanceof KillAuraModule k) y = renderAura(ctx, k, y, mouseX, mouseY);
+            else if (module instanceof FlyModule f) y = renderFly(ctx, f, y, mouseX, mouseY);
+            else y += 4;
         }
-        drawFooter(ctx, PANEL_Y + h - FOOTER_H);
+        drawFooter(ctx, y0 + h - FOOTER_H);
         super.render(ctx, mouseX, mouseY, delta);
     }
 
     private void drawHeader(DrawContext ctx) {
-        ctx.fill(PANEL_X, PANEL_Y, PANEL_X + PANEL_W, PANEL_Y + HEADER_H, HEADER_BG);
-        // alt vurgu
-        ctx.fill(PANEL_X, PANEL_Y + HEADER_H - 2, PANEL_X + PANEL_W, PANEL_Y + HEADER_H, HEADER_ACCENT);
-        ctx.drawTextWithShadow(this.textRenderer, "H I L E S I", PANEL_X + 10, PANEL_Y + 6, TEXT);
-        ctx.drawTextWithShadow(this.textRenderer, "Sag Shift ile kapat", PANEL_X + 10, PANEL_Y + 18, 0xFFD6EAF8);
-        // sagda versiyon
-        String v = "v0.1.12";
-        int w = this.textRenderer.getWidth(v);
-        ctx.drawTextWithShadow(this.textRenderer, v, PANEL_X + PANEL_W - w - 10, PANEL_Y + 10, 0xFFD6EAF8);
-        ctx.drawTextWithShadow(this.textRenderer, "1.21.11", PANEL_X + PANEL_W - this.textRenderer.getWidth("1.21.11") - 10, PANEL_Y + 21, 0xFF9CC3ED);
+        int x = panelX, y0 = panelY;
+        ctx.fill(x, y0, x + PANEL_W, y0 + HEADER_H, HEADER_BG);
+        ctx.fill(x, y0 + HEADER_H - 2, x + PANEL_W, y0 + HEADER_H, HEADER_ACCENT);
+        ctx.drawTextWithShadow(this.textRenderer, "H I L E S I", x + 10, y0 + 6, TEXT);
+        ctx.drawTextWithShadow(this.textRenderer, "Sag Shift ile kapat  •  Surukle", x + 10, y0 + 18, 0xFFD6EAF8);
+        String v = "v0.1.13";
+        ctx.drawTextWithShadow(this.textRenderer, v, x + PANEL_W - this.textRenderer.getWidth(v) - 10, y0 + 10, 0xFFD6EAF8);
+        ctx.drawTextWithShadow(this.textRenderer, "1.21.11", x + PANEL_W - this.textRenderer.getWidth("1.21.11") - 10, y0 + 21, 0xFF9CC3ED);
     }
 
     private void drawModuleRow(DrawContext ctx, Module module, int y, boolean hovered) {
-        int x1 = PANEL_X + 4;
-        int x2 = PANEL_X + PANEL_W - 4;
+        int x = panelX;
+        int x1 = x + 4;
+        int x2 = x + PANEL_W - 4;
         ctx.fill(x1, y, x2, y + ROW_H, hovered ? ROW_HOVER : ROW_BG);
-        // durum noktasi
         int dotY = y + 8;
         ctx.fill(x1 + 7, dotY, x1 + 11, dotY + 4, module.isEnabled() ? GREEN : RED);
         ctx.drawTextWithShadow(this.textRenderer, module.getName(), x1 + 16, y + 6, TEXT);
         String state = module.isEnabled() ? "ON" : "OFF";
-        int sw = this.textRenderer.getWidth(state);
-        int stateColor = module.isEnabled() ? GREEN : RED;
-        ctx.drawTextWithShadow(this.textRenderer, state, x2 - sw - 10, y + 6, stateColor);
+        ctx.drawTextWithShadow(this.textRenderer, state, x2 - this.textRenderer.getWidth(state) - 10, y + 6,
+                module.isEnabled() ? GREEN : RED);
     }
 
     private void drawFooter(DrawContext ctx, int y) {
-        ctx.fill(PANEL_X + 4, y, PANEL_X + PANEL_W - 4, y + 1, BORDER);
+        int x = panelX;
+        ctx.fill(x + 4, y, x + PANEL_W - 4, y + 1, BORDER);
         String hint = "Sol tik: ON/OFF  •  Ayar: sol +  sag -";
-        int w = this.textRenderer.getWidth(hint);
-        ctx.drawTextWithShadow(this.textRenderer, hint, PANEL_X + (PANEL_W - w) / 2, y + 6, MUTED);
+        ctx.drawTextWithShadow(this.textRenderer, hint, x + (PANEL_W - this.textRenderer.getWidth(hint)) / 2, y + 6, MUTED);
     }
 
     private int renderAura(DrawContext ctx, KillAuraModule k, int y, int mouseX, int mouseY) {
-        int x1 = PANEL_X + 10;
-        int x2 = PANEL_X + PANEL_W - 10;
+        int x = panelX;
+        int x1 = x + 10, x2 = x + PANEL_W - 10;
         ctx.fill(x1, y, x2, y + ROW_H, SETTING_BG);
         ctx.drawTextWithShadow(this.textRenderer, "Kill Aura Ayarlari", x1 + 6, y + 6, BLUE);
         y += ROW_H;
@@ -147,8 +146,8 @@ public class ClickGuiScreen extends Screen {
     }
 
     private int renderFly(DrawContext ctx, FlyModule f, int y, int mouseX, int mouseY) {
-        int x1 = PANEL_X + 10;
-        int x2 = PANEL_X + PANEL_W - 10;
+        int x = panelX;
+        int x1 = x + 10, x2 = x + PANEL_W - 10;
         ctx.fill(x1, y, x2, y + ROW_H, SETTING_BG);
         ctx.drawTextWithShadow(this.textRenderer, "Fly Ayarlari  •  Space x2 ile ac/kapa", x1 + 6, y + 6, BLUE);
         y += ROW_H;
@@ -165,9 +164,8 @@ public class ClickGuiScreen extends Screen {
         return y + 4;
     }
 
-    // --- tiklama: render ile ayni koordinatlar ---
     private int moduleRowTop(int idx) {
-        int y = PANEL_Y + HEADER_H + 2;
+        int y = panelY + HEADER_H + 2;
         for (int i = 0; i < idx; i++) {
             Module m = ModuleManager.getModules().get(i);
             y += ROW_H + 2;
@@ -183,6 +181,15 @@ public class ClickGuiScreen extends Screen {
         double mx = click.x();
         double my = click.y();
         int button = click.button();
+
+        // Header surukleme (sol tik)
+        if (button == 0 && mx >= panelX && mx <= panelX + PANEL_W && my >= panelY && my <= panelY + HEADER_H) {
+            dragging = true;
+            dragOffsetX = (int) mx - panelX;
+            dragOffsetY = (int) my - panelY;
+            return true;
+        }
+
         if (button != 0 && button != 1) return super.mouseClicked(click, doubled);
         int dir = (button == 0) ? 1 : -1;
 
@@ -190,13 +197,13 @@ public class ClickGuiScreen extends Screen {
         for (int mi = 0; mi < mods.size(); mi++) {
             Module module = mods.get(mi);
             int y = moduleRowTop(mi);
-            boolean inRow = mx >= PANEL_X + 4 && mx <= PANEL_X + PANEL_W - 4 && my >= y && my <= y + ROW_H;
+            boolean inRow = mx >= panelX + 4 && mx <= panelX + PANEL_W - 4 && my >= y && my <= y + ROW_H;
             if (inRow) { module.toggle(); return true; }
             y += ROW_H + 2;
             if (module instanceof KillAuraModule k) {
-                y += ROW_H; // baslik
+                y += ROW_H;
                 for (int i = 0; i < AURA_SETTING_COUNT; i++) {
-                    boolean inS = mx >= PANEL_X + 10 && mx <= PANEL_X + PANEL_W - 10 && my >= y && my <= y + SETTING_ROW_H;
+                    boolean inS = mx >= panelX + 10 && mx <= panelX + PANEL_W - 10 && my >= y && my <= y + SETTING_ROW_H;
                     if (inS) {
                         switch (i) {
                             case 0 -> k.cycleRange(dir);
@@ -213,13 +220,19 @@ public class ClickGuiScreen extends Screen {
             } else if (module instanceof FlyModule f) {
                 y += ROW_H;
                 for (int i = 0; i < FLY_SETTING_COUNT; i++) {
-                    boolean inS = mx >= PANEL_X + 10 && mx <= PANEL_X + PANEL_W - 10 && my >= y && my <= y + SETTING_ROW_H;
+                    boolean inS = mx >= panelX + 10 && mx <= panelX + PANEL_W - 10 && my >= y && my <= y + SETTING_ROW_H;
                     if (inS) { f.cycleSpeed(dir); return true; }
                     y += SETTING_ROW_H;
                 }
             }
         }
         return super.mouseClicked(click, doubled);
+    }
+
+    @Override
+    public boolean mouseReleased(Click click) {
+        dragging = false;
+        return super.mouseReleased(click);
     }
 
     @Override
