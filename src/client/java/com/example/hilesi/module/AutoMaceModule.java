@@ -112,8 +112,7 @@ public class AutoMaceModule extends Module {
         for (int i = 0; i < 9; i++) {
             ItemStack s = me.getInventory().getStack(i);
             if (s != null && s.getItem() == Items.MACE) {
-                // 1.21.11'de selectedSlot alanina yaz
-                me.getInventory().selectedSlot = i;
+                me.getInventory().setSelectedSlot(i);
                 return;
             }
         }
