@@ -39,9 +39,9 @@ public class HilesiClient implements ClientModInitializer {
                 try {
                     if (openMenuKey != null) {
                         while (openMenuKey.consumeClick()) {
-                            if (client.gui.screen == null) {
+                            if (client.gui.screen() == null) {
                                 client.gui.setScreen(new ClickGuiScreen());
-                            } else if (client.gui.screen instanceof ClickGuiScreen) {
+                            } else if (client.gui.screen() instanceof ClickGuiScreen) {
                                 client.gui.setScreen(null);
                             }
                         }

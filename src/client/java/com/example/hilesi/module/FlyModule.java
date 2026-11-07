@@ -55,7 +55,7 @@ public class FlyModule extends Module {
     @Override
     public void onTick(Minecraft client) {
         if (client == null || client.player == null) return;
-        if (doubleJump && client.gui.screen == null) {
+        if (doubleJump && client.gui.screen() == null) {
             try {
                 boolean jump = client.options.keyJump.isDown();
                 long now = System.currentTimeMillis();
