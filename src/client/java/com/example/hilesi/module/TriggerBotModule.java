@@ -25,10 +25,10 @@ public class TriggerBotModule extends Module {
         long now = System.currentTimeMillis();
         if (now - last < 1000L / Math.max(1, cps)) return;
         try {
-            if (client.player.getAttackCooldownProgress(0.5f) < 1.0f) return;
+            if (client.player.getAttackStrengthScale(0.5f) < 1.0f) return;
         } catch (Throwable ignored) {}
         try {
-            client.gameMode.attackEntity(client.player, t);
+            client.gameMode.attack(client.player, t);
             client.player.swing(net.minecraft.world.InteractionHand.MAIN_HAND);
             last = now;
         } catch (Throwable ignored) {}

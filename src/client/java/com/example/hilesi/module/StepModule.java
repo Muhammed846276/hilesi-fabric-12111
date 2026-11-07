@@ -1,7 +1,6 @@
 package com.example.hilesi.module;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.world.entity.ai.attributes.Attributes;
 
 public class StepModule extends Module {
     private float height = 1.25f;
@@ -12,8 +11,12 @@ public class StepModule extends Module {
     private void apply(Minecraft c, float h) {
         if (c == null || c.player == null) return;
         try {
-            var inst = c.player.getAttributeInstance(Attributes.STEP_HEIGHT);
-            if (inst != null) inst.setBaseValue(h);
+            for (var m : c.player.getClass().getMethods()) {
+                if (m.getName().equals("getAttribute") && m.getParameterCount()==1) {
+                    Object inst = m.invoke(c.player, net.minecraft.world.entity.ai.attributes.Attributes.STEP_HEIGHT);
+                    if (inst != null) { inst.getClass().getMethod("setBaseValue", double.class).invoke(inst, (double)h); return; }
+                }
+            }
         } catch (Throwable ignored) {}
     }
     @Override protected void onDisable() { apply(Minecraft.getInstance(), 0.6f); }

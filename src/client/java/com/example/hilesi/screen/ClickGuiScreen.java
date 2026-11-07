@@ -16,7 +16,7 @@ import com.example.hilesi.module.EspModule;
 import com.example.hilesi.module.ChestStealerModule;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 
 import java.util.ArrayList;
@@ -65,10 +65,10 @@ public class ClickGuiScreen extends Screen {
         box(ctx, panelX, panelY, panelX + panelW, panelY + panelH, LINE);
         ctx.fill(panelX, panelY, panelX + panelW, panelY + 2, ACCENT2);
         ctx.fill(panelX, panelY + 2, panelX + panelW, panelY + 3, ACCENT);
-        ctx.ctx.text(this.font, "HILESI MENU", panelX + 16, panelY + 12, TXT);
-        ctx.ctx.text(this.font, "Sag Shift: kapat | X: XRay tusu", panelX + 16, panelY + 26, DIM);
+        ctx.text(this.font, "HILESI MENU", panelX + 16, panelY + 12, TXT);
+        ctx.text(this.font, "Sag Shift: kapat | X: XRay tusu", panelX + 16, panelY + 26, DIM);
         String ver = "v0.1.24+26.1  |  26.1  Fabric";
-        ctx.ctx.text(this.font, ver, panelX + panelW - this.font.width(ver) - 14, panelY + 18, MUTED);
+        ctx.text(this.font, ver, panelX + panelW - this.font.width(ver) - 14, panelY + 18, MUTED);
         drawTabs(ctx, mouseX, mouseY); drawContent(ctx, mouseX, mouseY);
         super.extractRenderState(ctx, mouseX, mouseY, delta);
     }
@@ -81,7 +81,7 @@ public class ClickGuiScreen extends Screen {
             ctx.fill(tx, ty, tx + tw, ty + TAB_H - 2, active ? TAB_A : (hov ? TAB_HOV : TAB_N));
             if (active) ctx.fill(tx, ty + TAB_H - 4, tx + tw, ty + TAB_H - 2, ACCENT);
             String label = tabs.get(i).name + " (" + tabs.get(i).modules.size() + ")";
-            ctx.ctx.text(this.font, label, tx + 8, ty + 11, active ? TXT : DIM);
+            ctx.text(this.font, label, tx + 8, ty + 11, active ? TXT : DIM);
         }
         ctx.fill(panelX + 1, panelY + TOP_H - 1, panelX + panelW - 1, panelY + TOP_H, LINE);
     }
@@ -116,19 +116,19 @@ public class ClickGuiScreen extends Screen {
         int h = cardHeight(m); boolean hov = mx >= x && mx <= x + CARD_W && my >= y && my <= y + CARD_HEADER_H;
         ctx.fill(x, y, x + CARD_W, y + h, CARD); ctx.fill(x, y, x + CARD_W, y + CARD_HEADER_H, hov ? CARD_HOV : CARD);
         box(ctx, x, y, x + CARD_W, y + h, LINE); ctx.fill(x, y, x + 3, y + h, m.isEnabled() ? ON : 0xFF334155);
-        ctx.ctx.text(this.font, m.getName(), x + 12, y + 10, TXT);
+        ctx.text(this.font, m.getName(), x + 12, y + 10, TXT);
         drawToggle(ctx, x + CARD_W - 64, y + 7, m.isEnabled());
         int sy = y + CARD_HEADER_H + 4;
-        if (rows(m)==0) ctx.ctx.text(this.font, "Ayar yok. Tıkla: ac/kapa", x + 12, sy + 2, MUTED);
+        if (rows(m)==0) ctx.text(this.font, "Ayar yok. Tıkla: ac/kapa", x + 12, sy + 2, MUTED);
         else drawSettings(ctx, m, x, sy, mx, my);
     }
 
     private void drawToggle(GuiGraphicsExtractor ctx, int x, int y, boolean on) {
         int w=52,h=16; ctx.fill(x,y,x+w,y+h,on?ON_BG:OFF_BG); box(ctx,x,y,x+w,y+h,on?ON:OFF);
-        String t=on?"ACIK":"KAPALI"; ctx.ctx.text(this.font,t,x+(w-this.font.width(t))/2,y+4,on?ON:OFF);
+        String t=on?"ACIK":"KAPALI"; ctx.text(this.font,t,x+(w-this.font.width(t))/2,y+4,on?ON:OFF);
     }
-    private void row(GuiGraphicsExtractor ctx,int mx,int my,int cardX,int y,String label,String val){ int x1=cardX+8,x2=cardX+CARD_W-8; boolean hov=mx>=x1&&mx<=x2&&my>=y&&my<=y+SET_ROW_H-2; ctx.fill(x1,y,x2,y+SET_ROW_H-2,hov?SET_HOV:SET_BG); ctx.ctx.text(this.font,label,x1+8,y+5,DIM); ctx.ctx.text(this.font,val,x2-this.font.width(val)-8,y+5,TXT); }
-    private void rowBool(GuiGraphicsExtractor ctx,int mx,int my,int cardX,int y,String label,boolean on){ int x1=cardX+8,x2=cardX+CARD_W-8; boolean hov=mx>=x1&&mx<=x2&&my>=y&&my<=y+SET_ROW_H-2; ctx.fill(x1,y,x2,y+SET_ROW_H-2,hov?SET_HOV:SET_BG); ctx.ctx.text(this.font,label,x1+8,y+5,DIM); String v=on?"ACIK":"KAPALI"; ctx.ctx.text(this.font,v,x2-this.font.width(v)-8,y+5,on?ON:OFF); }
+    private void row(GuiGraphicsExtractor ctx,int mx,int my,int cardX,int y,String label,String val){ int x1=cardX+8,x2=cardX+CARD_W-8; boolean hov=mx>=x1&&mx<=x2&&my>=y&&my<=y+SET_ROW_H-2; ctx.fill(x1,y,x2,y+SET_ROW_H-2,hov?SET_HOV:SET_BG); ctx.text(this.font,label,x1+8,y+5,DIM); ctx.text(this.font,val,x2-this.font.width(val)-8,y+5,TXT); }
+    private void rowBool(GuiGraphicsExtractor ctx,int mx,int my,int cardX,int y,String label,boolean on){ int x1=cardX+8,x2=cardX+CARD_W-8; boolean hov=mx>=x1&&mx<=x2&&my>=y&&my<=y+SET_ROW_H-2; ctx.fill(x1,y,x2,y+SET_ROW_H-2,hov?SET_HOV:SET_BG); ctx.text(this.font,label,x1+8,y+5,DIM); String v=on?"ACIK":"KAPALI"; ctx.text(this.font,v,x2-this.font.width(v)-8,y+5,on?ON:OFF); }
 
     private void drawSettings(GuiGraphicsExtractor ctx, Module m, int x, int y, int mx, int my) {
         if (m instanceof KillAuraModule k) { row(ctx,mx,my,x,y,"Menzil",String.format("%.1f blok",k.getRange()));y+=SET_ROW_H; row(ctx,mx,my,x,y,"CPS",""+k.getCps());y+=SET_ROW_H; row(ctx,mx,my,x,y,"FOV",k.getFov()+"°");y+=SET_ROW_H; rowBool(ctx,mx,my,x,y,"Sadece Oyuncular",k.isPlayersOnly());y+=SET_ROW_H; rowBool(ctx,mx,my,x,y,"Otomatik Hedef",k.isAutoSwitch());y+=SET_ROW_H; rowBool(ctx,mx,my,x,y,"Oto Aim",k.isAutoAim()); }

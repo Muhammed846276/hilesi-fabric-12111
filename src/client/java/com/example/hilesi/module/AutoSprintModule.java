@@ -9,9 +9,9 @@ public class AutoSprintModule extends Module {
         if (!isEnabled() || client == null || client.player == null) return;
         if (client.screen != null) return;
         try {
-            if (client.player.zza > 0 && !client.player.isSneaking() && !client.player.horizontalCollision) {
-                client.player.setSprinting(true);
-            }
+            boolean fwd = false;
+            try { fwd = client.player.input.forwardImpulse > 0; } catch(Throwable e){ fwd = client.options.keyUp.isDown(); }
+            if (fwd && !client.player.isShiftKeyDown()) client.player.setSprinting(true);
         } catch (Throwable ignored) {}
     }
 }

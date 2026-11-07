@@ -1,7 +1,7 @@
 package com.example.hilesi.module;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.phys.Vec3;
 
 public class SpeedModule extends Module {
     private double multiplier = 1.2;
@@ -15,14 +15,14 @@ public class SpeedModule extends Module {
         if (client.screen != null) return;
         if (!client.player.onGround()) return;
         try {
-            Vec3d v = client.player.getDeltaMovement();
-            double mx = client.player.input.leftImpulse;
-            double my = client.player.input.forwardImpulse;
-            if (mx == 0 && my == 0) return;
-            float yaw = client.player.getYaw();
+            Vec3 v = client.player.getDeltaMovement();
+            float fwd = 0, side = 0;
+            try { fwd = client.player.input.forwardImpulse; side = client.player.input.leftImpulse; } catch(Throwable e){}
+            if (fwd == 0 && side == 0) return;
+            float yaw = client.player.getYRot();
             double rad = Math.toRadians(yaw);
-            double moveX = -Math.sin(rad) * my * 0.1 * multiplier + Math.cos(rad) * mx * 0.1 * multiplier;
-            double moveZ = Math.cos(rad) * my * 0.1 * multiplier + Math.sin(rad) * mx * 0.1 * multiplier;
+            double moveX = -Math.sin(rad) * fwd * 0.1 * multiplier + Math.cos(rad) * side * 0.1 * multiplier;
+            double moveZ = Math.cos(rad) * fwd * 0.1 * multiplier + Math.sin(rad) * side * 0.1 * multiplier;
             client.player.setDeltaMovement(v.x + moveX, v.y, v.z + moveZ);
         } catch (Throwable ignored) {}
     }
