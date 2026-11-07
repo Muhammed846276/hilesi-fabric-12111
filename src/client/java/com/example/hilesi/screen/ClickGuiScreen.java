@@ -66,7 +66,7 @@ public class ClickGuiScreen extends Screen {
         ctx.drawTextWithShadow(this.textRenderer, "--- Ayarlar (sol:+ sag:-) ---", PANEL_X + PADDING + 8, y, 0xFFAAAAAA);
         y += ROW_H;
         String[] lines = {
-                "Menzil: " + String.format("%.1f", k.getRange()),
+                "Menzil: " + String.format("%.1f", k.getRange()) + " (1.0-8.0)",
                 "CPS: " + k.getCps(),
                 "FOV: " + k.getFov(),
                 "Sadece Oyuncular: " + (k.isPlayersOnly() ? "ON" : "OFF"),
@@ -102,7 +102,7 @@ public class ClickGuiScreen extends Screen {
         ctx.drawTextWithShadow(this.textRenderer, "--- Mace Ayarlari (sol:+ sag:-) ---", PANEL_X + PADDING + 8, y, 0xFFAAAAAA);
         y += ROW_H;
         String[] lines = {
-                "Menzil: " + String.format("%.1f", m.getRange()),
+                "Menzil: " + String.format("%.1f", m.getRange()) + " (1.0-8.0)",
                 "CPS: " + m.getCps(),
                 "FOV: " + m.getFov(),
                 "Sadece Oyuncular: " + (m.isPlayersOnly() ? "ON" : "OFF"),

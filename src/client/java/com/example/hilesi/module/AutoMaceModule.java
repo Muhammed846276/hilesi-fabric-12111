@@ -39,7 +39,7 @@ public class AutoMaceModule extends Module {
     public boolean isAutoAim() { return autoAim; }
     public boolean isStunSlam() { return stunSlam; }
 
-    public void setRange(double v) { this.range = clamp(v, 3.0, 8.0); }
+    public void setRange(double v) { this.range = clamp(v, 1.0, 8.0); }
     public void setCps(int v) { this.cps = clamp(v, 1, 20); }
     public void setFov(int v) { this.fov = clamp(v, 30, 360); }
     public void setPlayersOnly(boolean v) { this.playersOnly = v; }

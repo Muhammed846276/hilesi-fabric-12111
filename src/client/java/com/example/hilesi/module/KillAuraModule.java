@@ -34,7 +34,7 @@ public class KillAuraModule extends Module {
     public boolean isAutoSwitch() { return autoSwitch; }
     public boolean isAutoAim() { return autoAim; }
 
-    public void setRange(double range) { this.range = clamp(range, 3.0, 8.0); }
+    public void setRange(double range) { this.range = clamp(range, 1.0, 8.0); }
     public void setCps(int cps) { this.cps = clamp(cps, 1, 20); }
     public void setFov(int fov) { this.fov = clamp(fov, 30, 360); }
     public void setPlayersOnly(boolean v) { this.playersOnly = v; }
