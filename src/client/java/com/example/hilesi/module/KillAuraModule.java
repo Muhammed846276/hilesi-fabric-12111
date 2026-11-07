@@ -58,7 +58,7 @@ public class KillAuraModule extends Module {
     @Override
     public void onTick(Minecraft client) {
         if (!isEnabled() || client == null || client.player == null || client.level == null) return;
-        if (client.screen != null) return;
+        if (client.gui.screen != null) return;
         if (!client.player.isAlive()) return;
 
         Entity target = findTarget(client);
