@@ -11,6 +11,9 @@ import org.lwjgl.glfw.GLFW;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Guvenli baslatma: hata firlatsa bile oyun crash vermez, sadece loga yazar.
+ */
 public class HilesiClient implements ClientModInitializer {
     public static final String MOD_ID = "hilesi";
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
@@ -19,27 +22,37 @@ public class HilesiClient implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
-        LOGGER.info("Hilesi yukleniyor...");
+        try {
+            LOGGER.info("Hilesi yukleniyor (v0.1.1)...");
+            ModuleManager.init();
 
-        ModuleManager.init();
+            openMenuKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
+                    "key.hilesi.open_menu",
+                    InputUtil.Type.KEYSYM,
+                    GLFW.GLFW_KEY_RIGHT_SHIFT,
+                    KeyBinding.Category.GAMEPLAY
+            ));
 
-        openMenuKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
-                "key.hilesi.open_menu",
-                InputUtil.Type.KEYSYM,
-                GLFW.GLFW_KEY_RIGHT_SHIFT,
-                KeyBinding.Category.MISC
-        ));
-
-        ClientTickEvents.END_CLIENT_TICK.register(client -> {
-            while (openMenuKey.wasPressed()) {
-                if (client.currentScreen == null) {
-                    client.setScreen(new ClickGuiScreen());
-                } else if (client.currentScreen instanceof ClickGuiScreen) {
-                    client.setScreen(null);
+            ClientTickEvents.END_CLIENT_TICK.register(client -> {
+                try {
+                    if (openMenuKey != null) {
+                        while (openMenuKey.wasPressed()) {
+                            if (client.currentScreen == null) {
+                                client.setScreen(new ClickGuiScreen());
+                            } else if (client.currentScreen instanceof ClickGuiScreen) {
+                                client.setScreen(null);
+                            }
+                        }
+                    }
+                    ModuleManager.onTick(client);
+                } catch (Throwable t) {
+                    // Modtick'teki tek bir hatada oyunu crash'leme
+                    LOGGER.error("Hilesi tick hatasi", t);
                 }
-            }
-
-            ModuleManager.onTick(client);
-        });
+            });
+            LOGGER.info("Hilesi hazir. Menuyu acmak icin Sag Shift.");
+        } catch (Throwable t) {
+            LOGGER.error("Hilesi baslatilamadi (oyun devam edecek)", t);
+        }
     }
 }
