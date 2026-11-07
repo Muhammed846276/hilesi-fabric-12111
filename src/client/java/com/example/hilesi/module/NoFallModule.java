@@ -30,14 +30,14 @@ public class NoFallModule extends Module {
         } catch (Throwable ignored) {}
 
         try {
-            float fall = client.player.fallDistance;
+            double fall = client.player.fallDistance;
             double vy = client.player.getVelocity().y;
             // Tehlikeli dususte fallDistance'i sifirla ve ground paket dene
-            if (fall > 2.0f || vy < -0.55) {
-                client.player.fallDistance = 0.0f;
+            if (fall > 2.0 || vy < -0.55) {
+                client.player.fallDistance = 0.0;
                 sendGroundPacket(client);
-            } else if (fall > 0.0f) {
-                client.player.fallDistance = 0.0f;
+            } else if (fall > 0.0) {
+                client.player.fallDistance = 0.0;
             }
         } catch (Throwable ignored) {}
     }
