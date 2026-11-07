@@ -50,7 +50,8 @@ public class FlyModule extends Module {
             client.player.getAbilities().allowFlying = true;
             client.player.getAbilities().flying = true;
             client.player.getAbilities().setFlySpeed(flySpeed);
-            client.player.setNoFallDamage(true);
+            client.player.setFallFlying(false);
+            client.player.noFallDamage = true;
         } catch (Throwable ignored) {}
     }
 }
