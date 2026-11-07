@@ -14,6 +14,7 @@ public final class ModuleManager {
     public static void init() {
         MODULES.clear();
         MODULES.add(new KillAuraModule());
+        MODULES.add(new SpearAssistModule());
         MODULES.add(new FlyModule());
         MODULES.add(new NoFallModule());
         MODULES.add(new FullBrightModule());

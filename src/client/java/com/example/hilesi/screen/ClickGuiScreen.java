@@ -4,6 +4,7 @@ import com.example.hilesi.module.FlyModule;
 import com.example.hilesi.module.KillAuraModule;
 import com.example.hilesi.module.Module;
 import com.example.hilesi.module.ModuleManager;
+import com.example.hilesi.module.SpearAssistModule;
 import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
@@ -76,8 +77,8 @@ public class ClickGuiScreen extends Screen {
         Tab visual = new Tab("Gorsel");
         for (Module m : ModuleManager.getModules()) {
             String n = m.getName().toLowerCase();
-            if (n.contains("aura") || n.contains("attack") || n.contains("kill")) combat.modules.add(m);
-            else if (n.contains("fly") || n.contains("fall") || n.contains("speed") || n.contains("jump")) movement.modules.add(m);
+            if (n.contains("aura") || n.contains("attack") || n.contains("kill") || n.contains("spear")) combat.modules.add(m);
+            else if (n.contains("fly") || n.contains("fall") || n.contains("speed") || n.contains("jump") || n.contains("boost") || n.contains("dash")) movement.modules.add(m);
             else visual.modules.add(m);
         }
         tabs.add(combat);
@@ -109,6 +110,7 @@ public class ClickGuiScreen extends Screen {
         String sub = "Sag Shift: kapat  •  Sekmeli buyuk gorunum";
         ctx.drawTextWithShadow(this.textRenderer, sub, panelX + 16, panelY + 26, DIM);
         String ver = "v0.1.18  |  1.21.11  Fabric";
+        String ver = "v0.1.19  |  1.21.11  Fabric";
         ctx.drawTextWithShadow(this.textRenderer, ver, panelX + panelW - this.textRenderer.getWidth(ver) - 14, panelY + 18, MUTED);
     }
 
@@ -148,6 +150,7 @@ public class ClickGuiScreen extends Screen {
     private int cardHeight(Module m) {
         int h = CARD_HEADER_H + 6;
         if (m instanceof KillAuraModule) h += 6 * SET_ROW_H + 6;
+        else if (m instanceof SpearAssistModule) h += 4 * SET_ROW_H + 6;
         else if (m instanceof FlyModule) h += 3 * SET_ROW_H + 6;
         else h += 10;
         return h;
@@ -165,6 +168,7 @@ public class ClickGuiScreen extends Screen {
 
         int sy = y + CARD_HEADER_H + 4;
         if (m instanceof KillAuraModule k) drawAuraSettings(ctx, k, x, sy, mx, my);
+        else if (m instanceof SpearAssistModule s) drawSpearSettings(ctx, s, x, sy, mx, my);
         else if (m instanceof FlyModule f) drawFlySettings(ctx, f, x, sy, mx, my);
         else ctx.drawTextWithShadow(this.textRenderer, "Ayar yok. Tıkla: ac/kapa", x + 12, sy + 2, MUTED);
     }
@@ -185,6 +189,13 @@ public class ClickGuiScreen extends Screen {
         rowBool(ctx, mx, my, x, y, "Sadece Oyuncular", k.isPlayersOnly()); y += SET_ROW_H;
         rowBool(ctx, mx, my, x, y, "Otomatik Hedef", k.isAutoSwitch()); y += SET_ROW_H;
         rowBool(ctx, mx, my, x, y, "Oto Aim", k.isAutoAim());
+    }
+
+    private void drawSpearSettings(DrawContext ctx, SpearAssistModule s, int x, int y, int mx, int my) {
+        row(ctx, mx, my, x, y, "Min Menzil", String.format("%.0f blok", s.getMinRange())); y += SET_ROW_H;
+        row(ctx, mx, my, x, y, "Max Menzil", String.format("%.0f blok", s.getMaxRange())); y += SET_ROW_H;
+        row(ctx, mx, my, x, y, "Hiz / Itki", String.format("%.2f", s.getBoostSpeed())); y += SET_ROW_H;
+        rowBool(ctx, mx, my, x, y, "Sadece Oyuncular", s.isPlayersOnly());
     }
 
     private void drawFlySettings(DrawContext ctx, FlyModule f, int x, int y, int mx, int my) {
@@ -256,6 +267,18 @@ public class ClickGuiScreen extends Screen {
                             case 3 -> k.togglePlayersOnly();
                             case 4 -> k.toggleAutoSwitch();
                             case 5 -> k.toggleAutoAim();
+                        }
+                        return true;
+                    }
+                }
+            } else if (m instanceof SpearAssistModule s) {
+                for (int i = 0; i < 4; i++) {
+                    if (hitRow(mx, my, cx, sy + i * SET_ROW_H)) {
+                        switch (i) {
+                            case 0 -> s.cycleMinRange(dir);
+                            case 1 -> s.cycleMaxRange(dir);
+                            case 2 -> s.cycleBoostSpeed(dir);
+                            case 3 -> s.togglePlayersOnly();
                         }
                         return true;
                     }

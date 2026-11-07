@@ -3,7 +3,7 @@
   "id": "hilesi",
   "version": "${version}",
   "name": "Hilesi",
-  "description": "Adim adim gelistirilen mod menu altyapisi - Sag Shift menu + KillAura ayarları.",
+  "description": "Adim adim gelistirilen mod menu altyapisi - Sag Shift menu + KillAura ve Spear Boost.",
   "authors": ["User"],
   "contact": {},
   "license": "MIT",
