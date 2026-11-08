@@ -52,6 +52,7 @@ public final class ModuleManager {
         addSafe(new SearchModule());
         addSafe(new HudModule());
         addSafe(new InfoHudModule());
+        addSafe(new AutoUpdateModule());
         try { com.example.shadowpanel.util.Config.load(); } catch (Throwable ignored) {}
     }
 
