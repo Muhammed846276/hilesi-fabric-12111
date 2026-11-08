@@ -160,7 +160,15 @@ public class AutoMaceModule extends Module {
 
     private boolean isWearingElytra(Minecraft mc) {
         try {
-            for (ItemStack a : mc.player.getArmorSlots()) if (a != null && !a.isEmpty() && (a.is(Items.ELYTRA) || path(a).contains("elytra"))) return true;
+            try {
+                ItemStack a = mc.player.getItemBySlot(net.minecraft.world.entity.EquipmentSlot.CHEST);
+                if (a != null && !a.isEmpty() && (a.is(Items.ELYTRA) || path(a).contains("elytra"))) return true;
+            } catch (Throwable ignored) {}
+            try {
+                for (Object o : (Iterable<?>) mc.player.getClass().getMethod("getArmorSlots").invoke(mc.player)) {
+                    ItemStack a = (ItemStack) o; if (a != null && !a.isEmpty() && (a.is(Items.ELYTRA) || path(a).contains("elytra"))) return true;
+                }
+            } catch (Throwable ignored) {}
         } catch (Throwable ignored) {}
         return false;
     }
