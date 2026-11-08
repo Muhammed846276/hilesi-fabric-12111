@@ -22,7 +22,7 @@ public class HilesiClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         try {
-            LOGGER.info("Hilesi yukleniyor (v0.1.31+1.21.11)...");
+            LOGGER.info("Hilesi yukleniyor (v0.1.32+1.21.11)...");
             ModuleManager.init();
 
             openMenuKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
