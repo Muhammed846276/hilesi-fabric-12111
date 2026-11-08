@@ -1,0 +1,12 @@
+{
+  "required": false,
+  "package": "com.example.shadowpanel.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "client": [
+    "BlockStateBaseMixin",
+    "BlockMixin",
+    "GuiMixin",
+    "ClientPacketListenerMixin"
+  ],
+  "injectors": { "defaultRequire": 0 }
+}

@@ -1,13 +1,13 @@
 {
   "schemaVersion": 1,
-  "id": "hilesi",
+  "id": "shadowpanel",
   "version": "${version}",
-  "name": "Hilesi",
+  "name": "ShadowPanel",
   "description": "Client-side mod menu (Sag Shift) - modules for 26.1.2.",
   "authors": ["User"],
   "license": "MIT",
   "environment": "client",
-  "entrypoints": { "client": ["com.example.hilesi.client.HilesiClient"] },
-  "mixins": ["hilesi.client.mixins.json"],
+  "entrypoints": { "client": ["com.example.shadowpanel.client.ShadowPanelClient"] },
+  "mixins": ["shadowpanel.client.mixins.json"],
   "depends": { "fabricloader": ">=0.16.0", "minecraft": "~26.1.2", "java": ">=25", "fabric-api": "*" }
 }
