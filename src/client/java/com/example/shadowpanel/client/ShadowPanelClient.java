@@ -24,7 +24,7 @@ public class ShadowPanelClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         try {
-            LOGGER.info("ShadowPanel yukleniyor (v0.2.0+1.21.11)...");
+            LOGGER.info("ShadowPanel yukleniyor (v0.2.1+1.21.11)...");
             ModuleManager.init();
 
             openMenuKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(

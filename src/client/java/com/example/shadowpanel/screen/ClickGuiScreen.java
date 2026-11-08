@@ -4,6 +4,7 @@ import com.example.shadowpanel.module.Module;
 import com.example.shadowpanel.module.ModuleManager;
 import com.example.shadowpanel.module.KillAuraModule;
 import com.example.shadowpanel.module.SpearAssistModule;
+import com.example.shadowpanel.module.AutoMaceModule;
 import com.example.shadowpanel.module.FlyModule;
 import com.example.shadowpanel.module.StepModule;
 import com.example.shadowpanel.module.SpeedModule;
@@ -58,7 +59,7 @@ public class ClickGuiScreen extends Screen {
         for (Module m : ModuleManager.getModules()) {
             all.modules.add(m);
             String n = m.getName().toLowerCase();
-            if (n.contains("aura")||n.contains("attack")||n.contains("kill")||n.contains("spear")||n.contains("trigger")||n.contains("crit")||n.contains("reach")||n.contains("velocity")) combat.modules.add(m);
+            if (n.contains("aura")||n.contains("attack")||n.contains("kill")||n.contains("spear")||n.contains("mace")||n.contains("trigger")||n.contains("crit")||n.contains("reach")||n.contains("velocity")) combat.modules.add(m);
             else if (n.contains("fly")||n.contains("speed")||n.contains("step")||n.contains("jump")||n.contains("sprint")||n.contains("scaffold")||n.contains("noslow")||n.contains("freecam")||n.contains("timer")) movement.modules.add(m);
             else if (n.contains("fall")||n.contains("place")||n.contains("break")||n.contains("tool")||n.contains("chest")||n.contains("armor")||n.contains("auto")) player.modules.add(m);
             else visual.modules.add(m);
@@ -100,7 +101,7 @@ public class ClickGuiScreen extends Screen {
         ctx.fill(panelX, panelY + 2, panelX + panelW, panelY + 3, ACCENT);
         ctx.drawTextWithShadow(this.textRenderer, "HILESI MENU", panelX + 16, panelY + 12, TXT);
         ctx.drawTextWithShadow(this.textRenderer, "Sag Shift: kapat | X: XRay | Tekerlek: kaydir", panelX + 16, panelY + 26, DIM);
-        String ver = "v0.2.0+1.21.11  |  1.21.11  Fabric";
+        String ver = "v0.2.1+1.21.11  |  1.21.11  Fabric";
         ctx.drawTextWithShadow(this.textRenderer, ver, panelX + panelW - this.textRenderer.getWidth(ver) - 14, panelY + 18, MUTED);
         drawTabs(ctx, mouseX, mouseY); drawSearch(ctx, mouseX, mouseY); drawContent(ctx, mouseX, mouseY); drawScrollbar(ctx);
         super.render(ctx, mouseX, mouseY, delta);
@@ -156,6 +157,7 @@ public class ClickGuiScreen extends Screen {
     private int specificRows(Module m) {
         if (m instanceof KillAuraModule) return 6;
         if (m instanceof SpearAssistModule) return 7;
+        if (m instanceof AutoMaceModule) return 5;
         if (m instanceof FlyModule) return 5;
         if (m instanceof StepModule) return 1;
         if (m instanceof SpeedModule) return 1;
@@ -192,6 +194,7 @@ public class ClickGuiScreen extends Screen {
     private void drawSettings(DrawContext ctx, Module m, int x, int y, int mx, int my) {
         if (m instanceof KillAuraModule k) { row(ctx,mx,my,x,y,"Menzil",String.format("%.1f blok",k.getRange()));y+=SET_ROW_H; row(ctx,mx,my,x,y,"CPS",""+k.getCps());y+=SET_ROW_H; row(ctx,mx,my,x,y,"FOV",k.getFov()+"°");y+=SET_ROW_H; rowBool(ctx,mx,my,x,y,"Sadece Oyuncular",k.isPlayersOnly());y+=SET_ROW_H; rowBool(ctx,mx,my,x,y,"Otomatik Hedef",k.isAutoSwitch());y+=SET_ROW_H; rowBool(ctx,mx,my,x,y,"Oto Aim",k.isAutoAim()); }
         else if (m instanceof SpearAssistModule s) { row(ctx,mx,my,x,y,"Min Menzil",String.format("%.0f blok",s.getMinRange()));y+=SET_ROW_H; row(ctx,mx,my,x,y,"Max Menzil",String.format("%.0f blok",s.getMaxRange()));y+=SET_ROW_H; row(ctx,mx,my,x,y,"Hiz / Itki",String.format("%.2f",s.getBoostSpeed()));y+=SET_ROW_H; row(ctx,mx,my,x,y,"Aci (90-180)", s.getFov()>=180?"360 (her yon)":(s.getFov()+"°"));y+=SET_ROW_H; rowBool(ctx,mx,my,x,y,"Aim Kilidi (mouse)",s.isAimLock());y+=SET_ROW_H; rowBool(ctx,mx,my,x,y,"Duvarlari Yoksay",s.isIgnoreWalls());y+=SET_ROW_H; rowBool(ctx,mx,my,x,y,"Sadece Oyuncular",s.isPlayersOnly()); }
+        else if (m instanceof AutoMaceModule a) { row(ctx,mx,my,x,y,"Mod",a.getMode().name());y+=SET_ROW_H; row(ctx,mx,my,x,y,"Menzil",String.format("%.1f",a.getRange()));y+=SET_ROW_H; row(ctx,mx,my,x,y,"CPS",""+a.getCps());y+=SET_ROW_H; rowBool(ctx,mx,my,x,y,"Sadece Oyuncular",a.isTargetPlayers());y+=SET_ROW_H; row(ctx,mx,my,x,y,"FullAuto Yukseklik",String.format("%.0f",a.getBoostHeight())); }
         else if (m instanceof FlyModule f) { row(ctx,mx,my,x,y,"Ucus Hizi",String.format("%.2f",f.getFlySpeed()));y+=SET_ROW_H; row(ctx,mx,my,x,y,"Hiz",Math.round((f.getFlySpeed()-0.02f)/0.18f*100)+"%");y+=SET_ROW_H; rowBool(ctx,mx,my,x,y,"Double Jump (Space x2)",f.isDoubleJump());y+=SET_ROW_H; rowBool(ctx,mx,my,x,y,"Elytra Boost (W, fişeksiz)",f.isElytraBoost());y+=SET_ROW_H; row(ctx,mx,my,x,y,"Elytra Boost Hizi",String.format("%.2f",f.getElytraBoostSpeed())); }
         else if (m instanceof StepModule s) { row(ctx,mx,my,x,y,"Yukseklik",String.format("%.2f",s.getHeight())); }
         else if (m instanceof SpeedModule s) { row(ctx,mx,my,x,y,"Carpan",String.format("%.2f",s.getMultiplier())); }
@@ -285,6 +288,7 @@ public class ClickGuiScreen extends Screen {
         for(int i=0;i<sr;i++) if(hitRow(mx,my,cx,sy+i*SET_ROW_H)){
             if(m instanceof KillAuraModule k){ switch(i){case 0->k.cycleRange(dir);case 1->k.cycleCps(dir);case 2->k.cycleFov(dir);case 3->k.togglePlayersOnly();case 4->k.toggleAutoSwitch();case 5->k.toggleAutoAim();} return true; }
             if(m instanceof SpearAssistModule s){ switch(i){case 0->s.cycleMinRange(dir);case 1->s.cycleMaxRange(dir);case 2->s.cycleBoostSpeed(dir);case 3->s.cycleFov(dir);case 4->s.toggleAimLock();case 5->s.toggleIgnoreWalls();case 6->s.togglePlayersOnly();} return true; }
+            if(m instanceof AutoMaceModule a){ switch(i){case 0->a.cycleMode(dir);case 1->a.cycleRange(dir);case 2->a.cycleCps(dir);case 3->a.toggleTargetPlayers();case 4->a.cycleBoostHeight(dir);} return true; }
             if(m instanceof FlyModule f){ if(i==0||i==1) f.cycleSpeed(dir); else if(i==2) f.toggleDoubleJump(); else if(i==3) f.toggleElytraBoost(); else f.cycleElytraBoostSpeed(dir); return true; }
             if(m instanceof StepModule s){ s.cycleHeight(dir); return true; }
             if(m instanceof SpeedModule s){ s.cycleMultiplier(dir); return true; }

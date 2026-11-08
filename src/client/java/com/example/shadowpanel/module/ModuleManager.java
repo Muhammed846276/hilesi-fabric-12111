@@ -17,6 +17,7 @@ public final class ModuleManager {
         addSafe(new VelocityModule());
         addSafe(new ReachModule());
         addSafe(new SpearAssistModule());
+        addSafe(new AutoMaceModule());
         addSafe(new AutoSprintModule());
         addSafe(new SpeedModule());
         addSafe(new StepModule());
