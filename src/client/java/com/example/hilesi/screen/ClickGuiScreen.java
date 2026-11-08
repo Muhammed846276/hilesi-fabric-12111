@@ -106,7 +106,7 @@ public class ClickGuiScreen extends Screen {
         ctx.fill(panelX, panelY + 2, panelX + panelW, panelY + 3, ACCENT);
         ctx.text(this.font, "HILESI MENU", panelX + 16, panelY + 12, TXT, true);
         ctx.text(this.font, "Sag Shift: kapat | X: XRay | Tekerlek: kaydir", panelX + 16, panelY + 26, DIM, true);
-        String ver = "v0.1.31+26.1  |  26.1  Fabric";
+        String ver = "v0.1.32+26.1  |  26.1  Fabric";
         ctx.text(this.font, ver, panelX + panelW - this.font.width(ver) - 14, panelY + 18, MUTED, true);
         drawTabs(ctx, mouseX, mouseY);
         drawSearch(ctx, mouseX, mouseY);
@@ -174,7 +174,7 @@ public class ClickGuiScreen extends Screen {
     private int rows(Module m) {
         if (m instanceof KillAuraModule) return 6;
         if (m instanceof SpearAssistModule) return 7;
-        if (m instanceof FlyModule) return 3;
+        if (m instanceof FlyModule) return 5;
         if (m instanceof StepModule) return 1;
         if (m instanceof SpeedModule) return 1;
         if (m instanceof TriggerBotModule) return 2;
@@ -213,7 +213,7 @@ public class ClickGuiScreen extends Screen {
     private void drawSettings(GuiGraphicsExtractor ctx, Module m, int x, int y, int mx, int my) {
         if (m instanceof KillAuraModule k) { row(ctx,mx,my,x,y,"Menzil",String.format("%.1f blok",k.getRange()));y+=SET_ROW_H; row(ctx,mx,my,x,y,"CPS",""+k.getCps());y+=SET_ROW_H; row(ctx,mx,my,x,y,"FOV",k.getFov()+"°");y+=SET_ROW_H; rowBool(ctx,mx,my,x,y,"Sadece Oyuncular",k.isPlayersOnly());y+=SET_ROW_H; rowBool(ctx,mx,my,x,y,"Otomatik Hedef",k.isAutoSwitch());y+=SET_ROW_H; rowBool(ctx,mx,my,x,y,"Oto Aim",k.isAutoAim()); }
         else if (m instanceof SpearAssistModule s) { row(ctx,mx,my,x,y,"Min Menzil",String.format("%.0f blok",s.getMinRange()));y+=SET_ROW_H; row(ctx,mx,my,x,y,"Max Menzil",String.format("%.0f blok",s.getMaxRange()));y+=SET_ROW_H; row(ctx,mx,my,x,y,"Hiz / Itki",String.format("%.2f",s.getBoostSpeed()));y+=SET_ROW_H; row(ctx,mx,my,x,y,"Aci (90-180)", s.getFov()>=180?"360 (her yon)":(s.getFov()+"°"));y+=SET_ROW_H; rowBool(ctx,mx,my,x,y,"Aim Kilidi (mouse)",s.isAimLock());y+=SET_ROW_H; rowBool(ctx,mx,my,x,y,"Duvarlari Yoksay",s.isIgnoreWalls());y+=SET_ROW_H; rowBool(ctx,mx,my,x,y,"Sadece Oyuncular",s.isPlayersOnly()); }
-        else if (m instanceof FlyModule f) { row(ctx,mx,my,x,y,"Ucus Hizi",String.format("%.2f",f.getFlySpeed()));y+=SET_ROW_H; row(ctx,mx,my,x,y,"Hiz",Math.round((f.getFlySpeed()-0.02f)/0.18f*100)+"%");y+=SET_ROW_H; rowBool(ctx,mx,my,x,y,"Double Jump (Space x2)",f.isDoubleJump()); }
+        else if (m instanceof FlyModule f) { row(ctx,mx,my,x,y,"Ucus Hizi",String.format("%.2f",f.getFlySpeed()));y+=SET_ROW_H; row(ctx,mx,my,x,y,"Hiz",Math.round((f.getFlySpeed()-0.02f)/0.18f*100)+"%");y+=SET_ROW_H; rowBool(ctx,mx,my,x,y,"Double Jump (Space x2)",f.isDoubleJump());y+=SET_ROW_H; rowBool(ctx,mx,my,x,y,"Elytra Boost (W, fişeksiz)",f.isElytraBoost());y+=SET_ROW_H; row(ctx,mx,my,x,y,"Elytra Boost Hizi",String.format("%.2f",f.getElytraBoostSpeed())); }
         else if (m instanceof StepModule s) { row(ctx,mx,my,x,y,"Yukseklik",String.format("%.2f",s.getHeight())); }
         else if (m instanceof SpeedModule s) { row(ctx,mx,my,x,y,"Carpan",String.format("%.2f",s.getMultiplier())); }
         else if (m instanceof TriggerBotModule t) { row(ctx,mx,my,x,y,"CPS",""+t.getCps());y+=SET_ROW_H; rowBool(ctx,mx,my,x,y,"Sadece Oyuncular",t.isPlayersOnly()); }
@@ -292,7 +292,7 @@ public class ClickGuiScreen extends Screen {
         for(int i=0;i<r;i++) if(hitRow(mx,my,cx,sy+i*SET_ROW_H)){
             if(m instanceof KillAuraModule k){ switch(i){case 0->k.cycleRange(dir);case 1->k.cycleCps(dir);case 2->k.cycleFov(dir);case 3->k.togglePlayersOnly();case 4->k.toggleAutoSwitch();case 5->k.toggleAutoAim();} return true; }
             if(m instanceof SpearAssistModule s){ switch(i){case 0->s.cycleMinRange(dir);case 1->s.cycleMaxRange(dir);case 2->s.cycleBoostSpeed(dir);case 3->s.cycleFov(dir);case 4->s.toggleAimLock();case 5->s.toggleIgnoreWalls();case 6->s.togglePlayersOnly();} return true; }
-            if(m instanceof FlyModule f){ if(i==2) f.toggleDoubleJump(); else f.cycleSpeed(dir); return true; }
+            if(m instanceof FlyModule f){ if(i==0||i==1) f.cycleSpeed(dir); else if(i==2) f.toggleDoubleJump(); else if(i==3) f.toggleElytraBoost(); else f.cycleElytraBoostSpeed(dir); return true; }
             if(m instanceof StepModule s){ s.cycleHeight(dir); return true; }
             if(m instanceof SpeedModule s){ s.cycleMultiplier(dir); return true; }
             if(m instanceof TriggerBotModule t){ if(i==0)t.cycleCps(dir); else t.togglePlayersOnly(); return true; }
