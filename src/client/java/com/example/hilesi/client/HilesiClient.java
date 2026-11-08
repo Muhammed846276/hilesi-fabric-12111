@@ -23,7 +23,7 @@ public class HilesiClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         try {
-            LOGGER.info("Hilesi yukleniyor (v0.1.19)...");
+            LOGGER.info("Hilesi yukleniyor (v0.1.20)...");
             ModuleManager.init();
             UpdateChecker.checkAsync();
 
