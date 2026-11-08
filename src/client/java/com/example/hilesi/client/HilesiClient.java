@@ -3,11 +3,12 @@ package com.example.hilesi.client;
 import com.example.hilesi.module.ModuleManager;
 import com.example.hilesi.module.XRayModule;
 import com.example.hilesi.screen.ClickGuiScreen;
+import com.mojang.blaze3d.platform.InputConstants;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 import net.minecraft.client.KeyMapping;
-import com.mojang.blaze3d.platform.InputConstants;
+import net.minecraft.resources.Identifier;
 import org.lwjgl.glfw.GLFW;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,28 +23,32 @@ public class HilesiClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         try {
-            LOGGER.info("Hilesi yukleniyor (v0.1.25+26.1.1)...");
+            LOGGER.info("Hilesi yukleniyor (v0.1.26+26.1.1)...");
             ModuleManager.init();
 
+            KeyMapping.Category category = KeyMapping.Category.register(Identifier.fromNamespaceAndPath(MOD_ID, "main"));
             openMenuKey = KeyMappingHelper.registerKeyMapping(new KeyMapping(
                     "key.hilesi.open_menu",
                     InputConstants.Type.KEYSYM,
                     GLFW.GLFW_KEY_RIGHT_SHIFT,
-                    KeyMapping.Category.register(net.minecraft.resources.Identifier.fromNamespaceAndPath("hilesi","main"))
+                    category
             ));
             xrayKey = KeyMappingHelper.registerKeyMapping(new KeyMapping(
                     "key.hilesi.toggle_xray",
                     InputConstants.Type.KEYSYM,
                     GLFW.GLFW_KEY_X,
-                    KeyMapping.Category.register(net.minecraft.resources.Identifier.fromNamespaceAndPath("hilesi","main"))
+                    category
             ));
 
             ClientTickEvents.END_CLIENT_TICK.register(client -> {
                 try {
                     if (openMenuKey != null) {
                         while (openMenuKey.consumeClick()) {
-                            if (client.screen == null) client.setScreen(new ClickGuiScreen());
-                            else if (client.screen instanceof ClickGuiScreen) client.setScreen(null);
+                            if (client.screen == null) {
+                                client.setScreen(new ClickGuiScreen());
+                            } else if (client.screen instanceof ClickGuiScreen) {
+                                client.setScreen(null);
+                            }
                         }
                     }
                     if (xrayKey != null) {
@@ -57,7 +62,7 @@ public class HilesiClient implements ClientModInitializer {
                     LOGGER.error("Hilesi tick hatasi", t);
                 }
             });
-            LOGGER.info("Hilesi hazir. Menu: Sag Shift, XRay: X.");
+            LOGGER.info("Hilesi hazir. Sag Shift=menu, X=XRay. Keybinds kayitli.");
         } catch (Throwable t) {
             LOGGER.error("Hilesi baslatilamadi (oyun devam edecek)", t);
         }
