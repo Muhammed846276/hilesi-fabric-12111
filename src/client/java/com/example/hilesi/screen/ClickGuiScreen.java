@@ -46,15 +46,17 @@ public class ClickGuiScreen extends Screen {
 
     private void buildTabs() {
         tabs.clear();
+        Tab all = new Tab("Tumu");
         Tab combat = new Tab("Savas"), movement = new Tab("Hareket"), player = new Tab("Player"), visual = new Tab("Gorsel");
         for (Module m : ModuleManager.getModules()) {
+            all.modules.add(m);
             String n = m.getName().toLowerCase();
             if (n.contains("aura")||n.contains("attack")||n.contains("kill")||n.contains("spear")||n.contains("trigger")||n.contains("crit")||n.contains("reach")||n.contains("velocity")) combat.modules.add(m);
             else if (n.contains("fly")||n.contains("speed")||n.contains("step")||n.contains("jump")||n.contains("sprint")||n.contains("scaffold")||n.contains("noslow")||n.contains("freecam")||n.contains("timer")) movement.modules.add(m);
             else if (n.contains("fall")||n.contains("place")||n.contains("break")||n.contains("tool")||n.contains("chest")||n.contains("armor")||n.contains("auto")) player.modules.add(m);
             else visual.modules.add(m);
         }
-        tabs.add(combat); tabs.add(movement); tabs.add(player); tabs.add(visual);
+        tabs.add(all); tabs.add(combat); tabs.add(movement); tabs.add(player); tabs.add(visual);
         if (activeTab >= tabs.size()) activeTab = 0;
     }
 
