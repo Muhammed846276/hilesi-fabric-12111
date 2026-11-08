@@ -67,14 +67,12 @@ public class FlyModule extends Module {
         }
         if (!isEnabled() || !client.player.isAlive()) return;
 
-        // Elytra boost (fişeksiz): bakış/ileri yönde ivme
+        // Elytra boost (fişeksiz): sadece W (ileri) basiliyken
         try {
-            if (elytraBoost && client.player.isFallFlying() && client.screen == null) {
+            if (elytraBoost && client.player.isFallFlying() && client.screen == null && client.options.keyUp.isDown()) {
                 Vec3 look = client.player.getLookAngle();
                 Vec3 v = client.player.getDeltaMovement();
                 double add = elytraBoostSpeed;
-                // forward key = daha güçlü boost
-                try { if (client.options.keyUp.isDown()) add *= 1.8; } catch (Throwable ignored) {}
                 client.player.setDeltaMovement(v.x + look.x * add, v.y + look.y * add * 0.6, v.z + look.z * add);
                 return;
             }
