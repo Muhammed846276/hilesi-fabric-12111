@@ -23,7 +23,7 @@ public class HilesiClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         try {
-            LOGGER.info("Hilesi yukleniyor (v0.1.30+26.1.1.1.1)...");
+            LOGGER.info("Hilesi yukleniyor (v0.1.30+26.1.1)...");
             ModuleManager.init();
 
             KeyMapping.Category category = KeyMapping.Category.register(Identifier.fromNamespaceAndPath(MOD_ID, "main"));
