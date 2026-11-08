@@ -1,6 +1,7 @@
 package com.example.shadowpanel.screen;
 
 import com.example.shadowpanel.module.*;
+import com.example.shadowpanel.module.Module;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
