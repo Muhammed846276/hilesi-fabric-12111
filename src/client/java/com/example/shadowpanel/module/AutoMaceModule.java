@@ -12,10 +12,12 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.Comparator;
 import java.util.List;
 
-/** AutoMace (Yarn 1.21.11): SpearMace / StunSlam / FullAuto */
+/** AutoMace (Yarn 1.21.11, mapping-safe) */
 public class AutoMaceModule extends Module {
     public enum Mode { SPEAR_MACE, STUN_SLAM, FULL_AUTO }
     private Mode mode = Mode.SPEAR_MACE;
@@ -54,11 +56,9 @@ public class AutoMaceModule extends Module {
     }
 
     private void tickSpearMace(MinecraftClient mc) {
-        LivingEntity target = findTarget(mc, range);
-        if (target == null) return;
+        LivingEntity target = findTarget(mc, range); if (target == null) return;
         int mace = findHotbar(mc, this::isMace), spear = findHotbar(mc, this::isSpear);
-        double dist = mc.player.distanceTo(target);
-        boolean falling = mc.player.getVelocity().y < -0.08;
+        double dist = mc.player.distanceTo(target); boolean falling = mc.player.getVelocity().y < -0.08;
         if (falling && mace >= 0) selectSlot(mc, mace);
         else if (dist > 3.5 && spear >= 0) selectSlot(mc, spear);
         else if (mace >= 0) selectSlot(mc, mace);
@@ -77,14 +77,13 @@ public class AutoMaceModule extends Module {
     }
 
     private void tickFullAuto(MinecraftClient mc) {
-        LivingEntity target = findTarget(mc, Math.max(range, 24.0));
-        if (target == null) return;
-        boolean elytraOn = isWearingElytra(mc);
+        LivingEntity target = findTarget(mc, Math.max(range, 24.0)); if (target == null) return;
+        boolean elytraOn = isWearingElytra(mc); boolean gliding = isGliding(mc.player);
         int mace = findHotbar(mc, this::isMace), rocket = findHotbar(mc, this::isRocket);
-        if (elytraOn && (mc.player.isFallFlying() || isMovingForward(mc)) && rocket >= 0) {
+        if (elytraOn && (gliding || isMovingForward(mc)) && rocket >= 0) {
             double dy = mc.player.getY() - target.getY();
             boolean needHeight = dy < boostHeight * 0.5 && mc.player.getY() < target.getY() + boostHeight;
-            if (needHeight || (mc.player.isFallFlying() && mc.player.getVelocity().y > -0.2 && dy < boostHeight)) {
+            if (needHeight || (gliding && mc.player.getVelocity().y > -0.2 && dy < boostHeight)) {
                 selectSlot(mc, rocket);
                 try { mc.interactionManager.interactItem(mc.player, Hand.MAIN_HAND); } catch (Throwable ignored) {}
                 lookToward(mc, target.getX(), target.getY() + boostHeight, target.getZ());
@@ -109,15 +108,35 @@ public class AutoMaceModule extends Module {
         try { for (int i=0;i<9;i++){ ItemStack s = mc.player.getInventory().getStack(i); if (s!=null && !s.isEmpty() && pred.test(s)) return i; } } catch (Throwable ignored) {}
         return -1;
     }
-    private void selectSlot(MinecraftClient mc, int slot) { if (slot<0||slot>8) return; try { mc.player.getInventory().selectedSlot = slot; } catch (Throwable ignored) {} }
+    private void selectSlot(MinecraftClient mc, int slot) {
+        if (slot<0||slot>8) return;
+        try { mc.player.getInventory().selectedSlot = slot; return; } catch (Throwable ignored) {}
+        try { Method m = mc.player.getInventory().getClass().getMethod("setSelectedSlot", int.class); m.invoke(mc.player.getInventory(), slot); } catch (Throwable ignored) {}
+        try { Field f = mc.player.getInventory().getClass().getDeclaredField("selectedSlot"); f.setAccessible(true); f.setInt(mc.player.getInventory(), slot); } catch (Throwable ignored) {}
+    }
     private boolean isMace(ItemStack s){ try { return s.isOf(Items.MACE) || path(s).equals("mace"); } catch (Throwable t){ return path(s).contains("mace"); } }
     private boolean isSpear(ItemStack s){ String p=path(s); return p.equals("spear")||p.endsWith("_spear"); }
     private boolean isAxe(ItemStack s){ return path(s).endsWith("_axe"); }
     private boolean isRocket(ItemStack s){ try { return s.isOf(Items.FIREWORK_ROCKET)||path(s).contains("firework"); } catch (Throwable t){ return path(s).contains("firework"); } }
     private String path(ItemStack s){ try { Identifier id = Registries.ITEM.getId(s.getItem()); return id!=null?id.getPath():""; } catch (Throwable t){ return ""; } }
-    private boolean isWearingElytra(MinecraftClient mc){ try { for (ItemStack a: mc.player.getArmorItems()) if (a!=null && !a.isEmpty() && (a.isOf(Items.ELYTRA)||path(a).contains("elytra"))) return true; } catch (Throwable ignored) {} return false; }
+    private boolean isWearingElytra(MinecraftClient mc){
+        try {
+            for (String mname : new String[]{"getArmorItems","getAllArmor","getArmorItems"})
+                try { for (Object o : (Iterable<?>) mc.player.getClass().getMethod(mname).invoke(mc.player)) { ItemStack a=(ItemStack)o; if (a!=null&&!a.isEmpty()&&(a.isOf(Items.ELYTRA)||path(a).contains("elytra"))) return true; } } catch (Throwable ignored) {}
+            try { ItemStack a = mc.player.getInventory().getArmorStack(2); if (a!=null&&!a.isEmpty()&&(a.isOf(Items.ELYTRA)||path(a).contains("elytra"))) return true; } catch (Throwable ignored) {}
+        } catch (Throwable ignored) {}
+        return false;
+    }
+    private boolean isGliding(Entity e){
+        for (String n : new String[]{"isFallFlying","isGliding"}) try { return (boolean)e.getClass().getMethod(n).invoke(e); } catch (Throwable ignored) {}
+        return false;
+    }
     private boolean isMovingForward(MinecraftClient mc){ try { return mc.options.forwardKey.isPressed(); } catch (Throwable t){ return false; } }
-    private void lookAt(MinecraftClient mc, Entity target){ try { Vec3d e = target.getPos().add(0,target.getHeight()*0.5,0); lookToward(mc,e.x,e.y,e.z); } catch (Throwable ignored) {} }
+    private Vec3d pos(Entity e){
+        for (String n : new String[]{"getPos","getLerpedPos"}) try { Object r = e.getClass().getMethod(n).invoke(e); if (r instanceof Vec3d v) return v; } catch (Throwable ignored) {}
+        return new Vec3d(e.getX(), e.getY(), e.getZ());
+    }
+    private void lookAt(MinecraftClient mc, Entity target){ try { Vec3d e = pos(target).add(0,target.getHeight()*0.5,0); lookToward(mc,e.x,e.y,e.z); } catch (Throwable ignored) {} }
     private void lookToward(MinecraftClient mc, double x,double y,double z){ try { Vec3d eye=mc.player.getEyePos(); double dx=x-eye.x,dy=y-eye.y,dz=z-eye.z,hd=Math.sqrt(dx*dx+dz*dz); mc.player.setYaw((float)(Math.toDegrees(Math.atan2(dz,dx))-90f)); mc.player.setPitch((float)(-Math.toDegrees(Math.atan2(dy,hd)))); } catch (Throwable ignored) {} }
     private void attack(MinecraftClient mc, LivingEntity target){ try { mc.interactionManager.attackEntity(mc.player,target); mc.player.swingHand(Hand.MAIN_HAND); } catch (Throwable ignored) {} }
 }
