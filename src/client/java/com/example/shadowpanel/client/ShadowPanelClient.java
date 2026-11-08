@@ -23,7 +23,7 @@ public class ShadowPanelClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         try {
-            LOGGER.info("ShadowPanel yukleniyor (v0.2.0+26.1)...");
+            LOGGER.info("ShadowPanel yukleniyor (v0.2.1+26.1)...");
             ModuleManager.init();
 
             KeyMapping.Category category = KeyMapping.Category.register(Identifier.fromNamespaceAndPath(MOD_ID, "main"));
