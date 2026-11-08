@@ -3,20 +3,18 @@
   "id": "hilesi",
   "version": "${version}",
   "name": "Hilesi",
-  "description": "Adim adim gelistirilen mod menu altyapisi - Sag Shift menu + KillAura ve Spear Boost.",
+  "description": "Client-side mod menu (Sag Shift) - modules for 26.2.",
   "authors": ["User"],
-  "contact": {},
   "license": "MIT",
   "environment": "client",
   "entrypoints": {
-    "client": [
-      "com.example.hilesi.client.HilesiClient"
-    ]
+    "client": ["com.example.hilesi.client.HilesiClient"]
   },
+  "mixins": ["hilesi.client.mixins.json"],
   "depends": {
-    "fabricloader": ">=0.19.3",
+    "fabricloader": ">=0.16.0",
     "minecraft": "~26.2",
     "java": ">=25",
-    "fabric-api": ">=0.0.0"
+    "fabric-api": "*"
   }
 }
