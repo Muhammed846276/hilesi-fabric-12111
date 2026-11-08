@@ -20,6 +20,6 @@ Termux'ta Fabric mod derlemek pratikte zordur (JDK 21 + Gradle + bagimliliklar).
 Uretilen jar `build/libs/` altina gelir.
 
 ## Yapi
-- `src/client/java/com/example/hilesi/client/HilesiClient.java` - giris noktasi, Right Shift keybind
+- `src/client/java/com/example/hilesi/client/ShadowPanelClient.java` - giris noktasi, Right Shift keybind
 - `src/client/java/com/example/hilesi/screen/ClickGuiScreen.java` - menu/GUI
 - `src/client/java/com/example/hilesi/module/` - `Module`, `ModuleManager`, `KillAuraModule`
