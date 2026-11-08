@@ -29,7 +29,7 @@ public class ClickGuiScreen extends Screen {
     private static final int LINE = 0xFF263149;
     private static final int HDR = 0xFF111827;
     private static final int TAB_N = 0xFF111827;
-    private static final int TAB_H = 0xFF1F2937;
+    private static final int TAB_HOV_C = 0xFF1F2937;
     private static final int TAB_A = 0xFF312E81;
     private static final int TAB_A_LINE = 0xFF818CF8;
     private static final int ACCENT = 0xFF7C3AED;
@@ -126,7 +126,7 @@ public class ClickGuiScreen extends Screen {
             int tx = tabX(i), tw = 118;
             boolean active = i == activeTab;
             boolean hov = mx >= tx && mx <= tx + tw && my >= ty + 4 && my <= ty + TAB_H + 2;
-            ctx.fill(tx, ty + 4, tx + tw, ty + TAB_H + 2, active ? TAB_A : (hov ? TAB_H : TAB_N));
+            ctx.fill(tx, ty + 4, tx + tw, ty + TAB_H + 2, active ? TAB_A : (hov ? TAB_HOV_C : TAB_N));
             border(ctx, tx, ty + 4, tx + tw, ty + TAB_H + 2, active ? 0xFF6366F1 : LINE);
             if (active) ctx.fill(tx, ty + TAB_H, tx + tw, ty + TAB_H + 2, TAB_A_LINE);
             Tab t = tabs.get(i);
@@ -164,7 +164,7 @@ public class ClickGuiScreen extends Screen {
         ctx.drawTextWithShadow(this.textRenderer, "• Repo: Muhammed846276/hilesi-fabric-12111 (public)", x + 14, y + 74, DIM);
         ctx.drawTextWithShadow(this.textRenderer, "• Menu: Sag Shift  •  Ayar: sol + / sag -", x + 14, y + 92, DIM);
         ctx.drawTextWithShadow(this.textRenderer, "• Fly: hiz ayari + Double Jump toggle", x + 14, y + 110, DIM);
-        ctx.drawTextWithShadow(this.textRenderer, "Surum: v0.1.20  |  1.21.11 Fabric", x + 14, y + 140, MUTED);
+        ctx.drawTextWithShadow(this.textRenderer, "Surum: v0.1.21  |  1.21.11 Fabric", x + 14, y + 140, MUTED);
         ctx.drawTextWithShadow(this.textRenderer, "Shadow Panel temasi aktif.", x + 14, y + 158, 0xFFC4B5FD);
     }
 
