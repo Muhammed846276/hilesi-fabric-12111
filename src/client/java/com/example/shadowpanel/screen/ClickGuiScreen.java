@@ -95,9 +95,10 @@ public class ClickGuiScreen extends Screen {
         ctx.fill(px+SIDE_W-1,py,px+SIDE_W,py+ph,LINE);
         // header accent
         ctx.fill(px,py,px+pw,py+2,ACCENT_DIM);
-        ctx.drawTextWithShadow(textRenderer, "ShadowPanel", px+PAD, py+12, TXT);
-        ctx.drawTextWithShadow(textRenderer, "v0.2.2", px+PAD+textRenderer.getWidth("ShadowPanel")+6, py+12, ACCENT2);
-        ctx.drawTextWithShadow(textRenderer, "Sag Shift: kapat | Bind: modül ayarı", px+PAD, py+26, MUTED);
+        ctx.drawTextWithShadow(textRenderer, "ShadowPanel", px+PAD, py+10, TXT);
+        ctx.drawTextWithShadow(textRenderer, "Ben Shadow Panel'im", px+PAD, py+24, ACCENT2);
+        String info = "v0.2.3 | Sag Shift: kapat | X: XRay";
+        ctx.drawTextWithShadow(textRenderer, info, px+pw-textRenderer.getWidth(info)-14, py+14, MUTED);
 
         drawCats(ctx, mx, my);
         drawSearch(ctx, mx, my);
