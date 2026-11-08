@@ -263,24 +263,28 @@ public class ClickGuiScreen extends Screen {
     }
 
     @Override
-    public boolean charTyped(char chr, int modifiers) {
+    public boolean charTyped(net.minecraft.client.input.CharacterEvent event) {
         if (searchFocused) {
-            if (chr >= 32 && chr != 127 && search.length() < 32) {
-                search += chr; clampScroll(); return true;
+            int cp = event.codepoint();
+            if (cp >= 32 && cp != 127 && search.length() < 32) {
+                search += new String(Character.toChars(cp));
+                clampScroll();
+                return true;
             }
         }
-        return super.charTyped(chr, modifiers);
+        return super.charTyped(event);
     }
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+    public boolean keyPressed(net.minecraft.client.input.KeyEvent event) {
         if (searchFocused) {
+            int keyCode = event.key();
             if (keyCode == 259) { if (!search.isEmpty()) { search = search.substring(0, search.length()-1); clampScroll(); } return true; }
             if (keyCode == 256) { searchFocused=false; return true; }
             if (keyCode == 257 || keyCode == 335) { searchFocused=false; return true; }
             return true;
         }
-        return super.keyPressed(keyCode, scanCode, modifiers);
+        return super.keyPressed(event);
     }
 
     private boolean handleSettings(Module m,double mx,double my,int cx,int sy,int dir){
