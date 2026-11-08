@@ -1,9 +1,9 @@
-package com.example.hilesi.screen;
+package com.example.shadowpanel.screen;
 
-import com.example.hilesi.module.FlyModule;
-import com.example.hilesi.module.KillAuraModule;
-import com.example.hilesi.module.Module;
-import com.example.hilesi.module.ModuleManager;
+import com.example.shadowpanel.module.FlyModule;
+import com.example.shadowpanel.module.KillAuraModule;
+import com.example.shadowpanel.module.Module;
+import com.example.shadowpanel.module.ModuleManager;
 import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
@@ -164,7 +164,7 @@ public class ClickGuiScreen extends Screen {
         ctx.drawTextWithShadow(this.textRenderer, "• Repo: Muhammed846276/hilesi-fabric-12111 (public)", x + 14, y + 74, DIM);
         ctx.drawTextWithShadow(this.textRenderer, "• Menu: Sag Shift  •  Ayar: sol + / sag -", x + 14, y + 92, DIM);
         ctx.drawTextWithShadow(this.textRenderer, "• Fly: hiz ayari + Double Jump toggle", x + 14, y + 110, DIM);
-        ctx.drawTextWithShadow(this.textRenderer, "Surum: v0.1.21  |  1.21.11 Fabric", x + 14, y + 140, MUTED);
+        ctx.drawTextWithShadow(this.textRenderer, "Surum: v0.1.22  |  1.21.11 Fabric", x + 14, y + 140, MUTED);
         ctx.drawTextWithShadow(this.textRenderer, "Shadow Panel temasi aktif.", x + 14, y + 158, 0xFFC4B5FD);
     }
 

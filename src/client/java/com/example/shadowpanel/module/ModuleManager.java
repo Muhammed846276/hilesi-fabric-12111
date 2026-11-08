@@ -1,4 +1,4 @@
-package com.example.hilesi.module;
+package com.example.shadowpanel.module;
 
 import net.minecraft.client.MinecraftClient;
 

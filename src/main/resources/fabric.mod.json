@@ -1,16 +1,16 @@
 {
   "schemaVersion": 1,
-  "id": "hilesi",
+  "id": "shadowpanel",
   "version": "${version}",
-  "name": "Hilesi",
-  "description": "Adim adim gelistirilen mod menu altyapisi - Sag Shift menu + KillAura ayarları.",
+  "name": "Shadow Panel",
+  "description": "Shadow Panel - sekmeli mod menu (1.21.11) - Sag Shift menu + KillAura ayarları.",
   "authors": ["User"],
   "contact": {},
   "license": "MIT",
   "environment": "client",
   "entrypoints": {
     "client": [
-      "com.example.hilesi.client.HilesiClient"
+      "com.example.shadowpanel.client.ShadowPanelClient"
     ]
   },
   "depends": {

@@ -49,14 +49,14 @@ jobs:
         run: |
           VER="${{ steps.ver.outputs.ver }}"
           TAG="v${VER}"
-          JAR="build/libs/hilesi-${VER}.jar"
+          JAR="build/libs/shadowpanel-${VER}.jar"
+          COMPAT="build/libs/hilesi-${VER}.jar"
           if [ ! -f "$JAR" ]; then
-            echo "Jar not found: $JAR"
-            ls -la build/libs || true
-            exit 1
+            echo "Jar not found: $JAR"; ls -la build/libs || true; exit 1
           fi
+          cp "$JAR" "$COMPAT"
           gh release delete "$TAG" -y --repo "$GITHUB_REPOSITORY" || true
-          gh release create "$TAG" "$JAR" \
+          gh release create "$TAG" "$JAR" "$COMPAT" \
             --repo "$GITHUB_REPOSITORY" \
-            --title "Hilesi ${TAG}" \
-            --notes "Otomatik surum: ${TAG} (1.21.11 Fabric). mods klasorune koyup oyunu yeniden baslat."
+            --title "Shadow Panel ${TAG}" \
+            --notes "Otomatik surum: ${TAG} (1.21.11 Fabric). mods klasorune koy, eski jar'i sil, oyunu yeniden baslat. (hilesi-* uyumluluk kopyasi dahildir)"

@@ -1,7 +1,7 @@
-package com.example.hilesi.client;
+package com.example.shadowpanel.client;
 
-import com.example.hilesi.module.ModuleManager;
-import com.example.hilesi.screen.ClickGuiScreen;
+import com.example.shadowpanel.module.ModuleManager;
+import com.example.shadowpanel.screen.ClickGuiScreen;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
@@ -11,11 +11,8 @@ import org.lwjgl.glfw.GLFW;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * Guvenli baslatma: hata firlatsa bile oyun crash vermez, sadece loga yazar.
- */
-public class HilesiClient implements ClientModInitializer {
-    public static final String MOD_ID = "hilesi";
+public class ShadowPanelClient implements ClientModInitializer {
+    public static final String MOD_ID = "shadowpanel";
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
     private static KeyBinding openMenuKey;
@@ -23,12 +20,12 @@ public class HilesiClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         try {
-            LOGGER.info("Hilesi yukleniyor (v0.1.21)...");
+            LOGGER.info("Shadow Panel yukleniyor (v0.1.22)...");
             ModuleManager.init();
             UpdateChecker.checkAsync();
 
             openMenuKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
-                    "key.hilesi.open_menu",
+                    "key.shadowpanel.open_menu",
                     InputUtil.Type.KEYSYM,
                     GLFW.GLFW_KEY_RIGHT_SHIFT,
                     KeyBinding.Category.GAMEPLAY
@@ -48,12 +45,12 @@ public class HilesiClient implements ClientModInitializer {
                     }
                     ModuleManager.onTick(client);
                 } catch (Throwable t) {
-                    LOGGER.error("Hilesi tick hatasi", t);
+                    LOGGER.error("Shadow Panel tick hatasi", t);
                 }
             });
-            LOGGER.info("Hilesi hazir. Menuyu acmak icin Sag Shift.");
+            LOGGER.info("Shadow Panel hazir. Menuyu acmak icin Sag Shift.");
         } catch (Throwable t) {
-            LOGGER.error("Hilesi baslatilamadi (oyun devam edecek)", t);
+            LOGGER.error("Shadow Panel baslatilamadi (oyun devam edecek)", t);
         }
     }
 }
