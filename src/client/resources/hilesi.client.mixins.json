@@ -1,10 +1,10 @@
 {
-  "required": true,
+  "required": false,
   "package": "com.example.hilesi.mixin",
   "compatibilityLevel": "JAVA_21",
   "client": [
+    "AbstractBlockStateMixin",
+    "BlockMixin"
   ],
-  "injectors": {
-    "defaultRequire": 1
-  }
+  "injectors": { "defaultRequire": 1 }
 }
