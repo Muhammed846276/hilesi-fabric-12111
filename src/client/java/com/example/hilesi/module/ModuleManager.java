@@ -74,7 +74,7 @@ public final class ModuleManager {
 
     private static void handleBinds(Minecraft client) {
         if (client == null || client.getWindow() == null) return;
-        long win = client.getWindow().getWindow();
+        long win = client.getWindow().handle();
         if (client.gui.screen() != null) return; // don't toggle while in screens, except our GUI handles binds
         for (Module m : MODULES) {
             int b = m.getBind();

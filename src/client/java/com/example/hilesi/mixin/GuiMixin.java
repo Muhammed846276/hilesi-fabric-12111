@@ -22,7 +22,7 @@ public class GuiMixin {
     private void hilesi$drawHud() {
         try {
             Minecraft mc = Minecraft.getInstance();
-            if (mc == null || mc.player == null || mc.options.hideGui) return;
+            if (mc == null || mc.player == null || false) return;
             HudModule hud = ModuleManager.get(HudModule.class);
             if (hud != null && hud.isEnabled()) {
                 int y = 4;

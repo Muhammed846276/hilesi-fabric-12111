@@ -8,7 +8,7 @@ public class MiddleClickFriendModule extends Module {
     public MiddleClickFriendModule(){ super("MiddleClickFriend","Orta tikla arkadas ekle/cikar"); }
     @Override public void onTick(Minecraft client){
         if(!isEnabled()||client==null||client.getWindow()==null) return;
-        boolean down=false; try { down = GLFW.glfwGetMouseButton(client.getWindow().getWindow(), GLFW.GLFW_MOUSE_BUTTON_MIDDLE)==GLFW.GLFW_PRESS; } catch(Throwable ignored){}
+        boolean down=false; try { down = GLFW.glfwGetMouseButton(client.getWindow().handle(), GLFW.GLFW_MOUSE_BUTTON_MIDDLE)==GLFW.GLFW_PRESS; } catch(Throwable ignored){}
         if(down && !wasDown){
             try { if (client.crosshairPickEntity instanceof Player p) FriendManager.toggle(p.getGameProfile().name()); } catch(Throwable ignored){}
         }
