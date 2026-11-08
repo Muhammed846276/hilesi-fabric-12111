@@ -110,8 +110,7 @@ public class AutoMaceModule extends Module {
     }
     private void selectSlot(MinecraftClient mc, int slot) {
         if (slot<0||slot>8) return;
-        try { mc.player.getInventory().selectedSlot = slot; return; } catch (Throwable ignored) {}
-        try { Method m = mc.player.getInventory().getClass().getMethod("setSelectedSlot", int.class); m.invoke(mc.player.getInventory(), slot); } catch (Throwable ignored) {}
+        try { Method m = mc.player.getInventory().getClass().getMethod("setSelectedSlot", int.class); m.invoke(mc.player.getInventory(), slot); return; } catch (Throwable ignored) {}
         try { Field f = mc.player.getInventory().getClass().getDeclaredField("selectedSlot"); f.setAccessible(true); f.setInt(mc.player.getInventory(), slot); } catch (Throwable ignored) {}
     }
     private boolean isMace(ItemStack s){ try { return s.isOf(Items.MACE) || path(s).equals("mace"); } catch (Throwable t){ return path(s).contains("mace"); } }
@@ -121,9 +120,9 @@ public class AutoMaceModule extends Module {
     private String path(ItemStack s){ try { Identifier id = Registries.ITEM.getId(s.getItem()); return id!=null?id.getPath():""; } catch (Throwable t){ return ""; } }
     private boolean isWearingElytra(MinecraftClient mc){
         try {
-            for (String mname : new String[]{"getArmorItems","getAllArmor","getArmorItems"})
-                try { for (Object o : (Iterable<?>) mc.player.getClass().getMethod(mname).invoke(mc.player)) { ItemStack a=(ItemStack)o; if (a!=null&&!a.isEmpty()&&(a.isOf(Items.ELYTRA)||path(a).contains("elytra"))) return true; } } catch (Throwable ignored) {}
-            try { ItemStack a = mc.player.getInventory().getArmorStack(2); if (a!=null&&!a.isEmpty()&&(a.isOf(Items.ELYTRA)||path(a).contains("elytra"))) return true; } catch (Throwable ignored) {}
+            for (String mname : new String[]{"getArmorItems","getAllArmor","getArmor"})
+                try { Object r = mc.player.getClass().getMethod(mname).invoke(mc.player); if (r instanceof Iterable<?> it) for (Object o : it) { ItemStack a=(ItemStack)o; if (a!=null&&!a.isEmpty()&&(a.isOf(Items.ELYTRA)||path(a).contains("elytra"))) return true; } } catch (Throwable ignored) {}
+            try { Method m = mc.player.getInventory().getClass().getMethod("getArmorStack", int.class); Object r = m.invoke(mc.player.getInventory(), 2); if (r instanceof ItemStack a && !a.isEmpty()&&(a.isOf(Items.ELYTRA)||path(a).contains("elytra"))) return true; } catch (Throwable ignored) {}
         } catch (Throwable ignored) {}
         return false;
     }
