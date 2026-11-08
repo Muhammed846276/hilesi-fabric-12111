@@ -21,17 +21,22 @@ import net.minecraft.network.chat.Component;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class ClickGuiScreen extends Screen {
-    private static final int TAB_H = 34, TOP_H = 52, PADDING = 14, CARD_W = 320, CARD_HEADER_H = 30, SET_ROW_H = 20;
+    private static final int TAB_H = 34, TOP_H = 52, PADDING = 14, CARD_W = 320, CARD_HEADER_H = 30, SET_ROW_H = 20, SEARCH_H = 22;
     private static final int OVERLAY = 0xAA05070C, PANEL = 0xF00B1020, PANEL_2 = 0xFF0F1628, LINE = 0xFF243047;
     private static final int TAB_N = 0xFF121A2D, TAB_HOV = 0xFF1A2540, TAB_A = 0xFF1E3A8A, ACCENT = 0xFF38BDF8, ACCENT2 = 0xFF8B5CF6;
     private static final int CARD = 0xFF131C30, CARD_HOV = 0xFF18233C, SET_BG = 0xFF0E1526, SET_HOV = 0xFF162038;
     private static final int TXT = 0xFFF8FAFC, DIM = 0xFF94A3B8, MUTED = 0xFF64748B, ON = 0xFF34D399, OFF = 0xFFF87171, ON_BG = 0x3334D399, OFF_BG = 0x33F87171;
+    private static final int SEARCH_BG = 0xFF0C1324, SEARCH_FOCUS = 0xFF1E293B;
 
     private int panelX, panelY, panelW, panelH;
     private final List<Tab> tabs = new ArrayList<>();
     private int activeTab = 0;
+    private double scroll = 0;
+    private String search = "";
+    private boolean searchFocused = false;
 
     private static class Tab { final String name; final List<Module> modules = new ArrayList<>(); Tab(String name){this.name=name;} }
 
@@ -58,9 +63,41 @@ public class ClickGuiScreen extends Screen {
         }
         tabs.add(all); tabs.add(combat); tabs.add(movement); tabs.add(player); tabs.add(visual);
         if (activeTab >= tabs.size()) activeTab = 0;
+        clampScroll();
+    }
+
+    private List<Module> visibleModules() {
+        if (tabs.isEmpty()) return List.of();
+        List<Module> src = tabs.get(activeTab).modules;
+        if (search == null || search.isBlank()) return src;
+        String q = search.toLowerCase(Locale.ROOT).trim();
+        List<Module> out = new ArrayList<>();
+        for (Module m : src) if (m.getName().toLowerCase(Locale.ROOT).contains(q)) out.add(m);
+        return out;
+    }
+
+    private int contentTop() { return panelY + TOP_H + 8 + SEARCH_H + 6; }
+    private int contentBottom() { return panelY + panelH - 10; }
+
+    private int totalContentHeight() {
+        int h = 0;
+        List<Module> mods = visibleModules();
+        for (int i = 0; i < mods.size(); i++) {
+            h += cardHeight(mods.get(i));
+            if (i < mods.size() - 1) h += 8;
+        }
+        return h;
+    }
+
+    private void clampScroll() {
+        int view = contentBottom() - contentTop();
+        int max = Math.max(0, totalContentHeight() - view);
+        if (scroll < 0) scroll = 0;
+        if (scroll > max) scroll = max;
     }
 
     @Override public void extractRenderState(GuiGraphicsExtractor ctx, int mouseX, int mouseY, float delta) {
+        clampScroll();
         ctx.fill(0, 0, this.width, this.height, OVERLAY);
         ctx.fill(panelX, panelY, panelX + panelW, panelY + panelH, PANEL);
         ctx.fill(panelX + 1, panelY + TOP_H, panelX + panelW - 1, panelY + panelH - 1, PANEL_2);
@@ -68,10 +105,13 @@ public class ClickGuiScreen extends Screen {
         ctx.fill(panelX, panelY, panelX + panelW, panelY + 2, ACCENT2);
         ctx.fill(panelX, panelY + 2, panelX + panelW, panelY + 3, ACCENT);
         ctx.text(this.font, "HILESI MENU", panelX + 16, panelY + 12, TXT, true);
-        ctx.text(this.font, "Sag Shift: kapat | X: XRay tusu", panelX + 16, panelY + 26, DIM, true);
-        String ver = "v0.1.27+26.1.1  |  26.1.1  Fabric";
+        ctx.text(this.font, "Sag Shift: kapat | X: XRay | Tekerlek: kaydir", panelX + 16, panelY + 26, DIM, true);
+        String ver = "v0.1.28+26.1.1  |  26.1.1  Fabric";
         ctx.text(this.font, ver, panelX + panelW - this.font.width(ver) - 14, panelY + 18, MUTED, true);
-        drawTabs(ctx, mouseX, mouseY); drawContent(ctx, mouseX, mouseY);
+        drawTabs(ctx, mouseX, mouseY);
+        drawSearch(ctx, mouseX, mouseY);
+        drawContent(ctx, mouseX, mouseY);
+        drawScrollbar(ctx);
         super.extractRenderState(ctx, mouseX, mouseY, delta);
     }
 
@@ -88,13 +128,47 @@ public class ClickGuiScreen extends Screen {
         ctx.fill(panelX + 1, panelY + TOP_H - 1, panelX + panelW - 1, panelY + TOP_H, LINE);
     }
 
+    private int searchX1(){ return panelX + PADDING; }
+    private int searchX2(){ return panelX + PADDING + CARD_W; }
+    private int searchY(){ return panelY + TOP_H + 6; }
+    private void drawSearch(GuiGraphicsExtractor ctx, int mx, int my) {
+        int x1=searchX1(), x2=searchX2(), y=searchY();
+        boolean hov = mx>=x1&&mx<=x2&&my>=y&&my<=y+SEARCH_H;
+        ctx.fill(x1,y,x2,y+SEARCH_H, searchFocused?SEARCH_FOCUS:(hov?SET_HOV:SEARCH_BG));
+        box(ctx,x1,y,x2,y+SEARCH_H, searchFocused?ACCENT:LINE);
+        String show = search.isEmpty() ? "Ara: modul adi yaz..." : search + (searchFocused?"|":"");
+        ctx.text(this.font, show, x1+8, y+7, search.isEmpty()?MUTED:TXT, true);
+        if (!search.isEmpty()) ctx.text(this.font, "[x]", x2-18, y+7, hov?OFF:MUTED, true);
+    }
+
     private void drawContent(GuiGraphicsExtractor ctx, int mx, int my) {
         if (tabs.isEmpty()) return;
-        int cx = panelX + PADDING, cy = panelY + TOP_H + 10, maxY = panelY + panelH - 10;
-        for (Module m : tabs.get(activeTab).modules) {
-            int h = cardHeight(m); if (cy + h > maxY) break;
-            drawCard(ctx, m, cx, cy, mx, my); cy += h + 8;
+        List<Module> mods = visibleModules();
+        int cx = panelX + PADDING;
+        int top = contentTop(), bottom = contentBottom();
+        double cy = top - scroll;
+        for (Module m : mods) {
+            int h = cardHeight(m);
+            if (cy + h >= top - 2 && cy <= bottom) {
+                drawCard(ctx, m, cx, (int)cy, mx, my, top, bottom);
+            }
+            cy += h + 8;
         }
+        if (mods.isEmpty()) ctx.text(this.font, "Sonuc yok.", cx + 8, top + 8, MUTED, true);
+    }
+
+    private void drawScrollbar(GuiGraphicsExtractor ctx) {
+        int view = contentBottom() - contentTop();
+        int total = totalContentHeight();
+        if (total <= view) return;
+        int trackX = panelX + PADDING + CARD_W + 8;
+        int trackY = contentTop();
+        int trackH = view;
+        ctx.fill(trackX, trackY, trackX + 4, trackY + trackH, 0xFF162038);
+        int thumbH = Math.max(20, (int)(trackH * (view / (double)total)));
+        int maxScroll = total - view;
+        int thumbY = trackY + (int)((trackH - thumbH) * (scroll / Math.max(1, maxScroll)));
+        ctx.fill(trackX, thumbY, trackX + 4, thumbY + thumbH, ACCENT);
     }
 
     private int rows(Module m) {
@@ -114,10 +188,14 @@ public class ClickGuiScreen extends Screen {
     }
     private int cardHeight(Module m) { int r = rows(m); return CARD_HEADER_H + 6 + (r > 0 ? r * SET_ROW_H + 6 : 10); }
 
-    private void drawCard(GuiGraphicsExtractor ctx, Module m, int x, int y, int mx, int my) {
-        int h = cardHeight(m); boolean hov = mx >= x && mx <= x + CARD_W && my >= y && my <= y + CARD_HEADER_H;
-        ctx.fill(x, y, x + CARD_W, y + h, CARD); ctx.fill(x, y, x + CARD_W, y + CARD_HEADER_H, hov ? CARD_HOV : CARD);
-        box(ctx, x, y, x + CARD_W, y + h, LINE); ctx.fill(x, y, x + 3, y + h, m.isEnabled() ? ON : 0xFF334155);
+    private void drawCard(GuiGraphicsExtractor ctx, Module m, int x, int y, int mx, int my, int top, int bottom) {
+        int h = cardHeight(m);
+        if (y > bottom || y + h < top) return;
+        boolean hov = mx >= x && mx <= x + CARD_W && my >= y && my <= y + CARD_HEADER_H && my >= top && my <= bottom;
+        ctx.fill(x, y, x + CARD_W, y + h, CARD);
+        ctx.fill(x, y, x + CARD_W, y + CARD_HEADER_H, hov ? CARD_HOV : CARD);
+        box(ctx, x, y, x + CARD_W, y + h, LINE);
+        ctx.fill(x, y, x + 3, y + h, m.isEnabled() ? ON : 0xFF334155);
         ctx.text(this.font, m.getName(), x + 12, y + 10, TXT, true);
         drawToggle(ctx, x + CARD_W - 64, y + 7, m.isEnabled());
         int sy = y + CARD_HEADER_H + 4;
@@ -150,17 +228,59 @@ public class ClickGuiScreen extends Screen {
     private void box(GuiGraphicsExtractor ctx,int x1,int y1,int x2,int y2,int c){ ctx.fill(x1,y1,x2,y1+1,c); ctx.fill(x1,y2-1,x2,y2,c); ctx.fill(x1,y1,x1+1,y2,c); ctx.fill(x2-1,y1,x2,y2,c); }
 
     @Override public boolean mouseClicked(MouseButtonEvent event, boolean isDoubleClick) {
-        double mx=event.x(), my=event.y(); int button=event.button(); int ty=panelY+TOP_H-TAB_H;
-        for(int i=0;i<tabs.size();i++){ int tx=tabX(i),tw=112; if(mx>=tx&&mx<=tx+tw&&my>=ty&&my<=ty+TAB_H-2){ activeTab=i; return true; } }
+        double mx=event.x(), my=event.y(); int button=event.button();
+        int ty=panelY+TOP_H-TAB_H;
+        for(int i=0;i<tabs.size();i++){ int tx=tabX(i),tw=112; if(mx>=tx&&mx<=tx+tw&&my>=ty&&my<=ty+TAB_H-2){ activeTab=i; scroll=0; searchFocused=false; clampScroll(); return true; } }
+        int sx1=searchX1(), sx2=searchX2(), sy=searchY();
+        if (mx>=sx1&&mx<=sx2&&my>=sy&&my<=sy+SEARCH_H) {
+            if (!search.isEmpty() && mx >= sx2-22) { search=""; clampScroll(); }
+            searchFocused=true; return true;
+        } else { searchFocused=false; }
         if(button!=0&&button!=1||tabs.isEmpty()) return super.mouseClicked(event,isDoubleClick);
-        int dir=(button==0)?1:-1; int cx=panelX+PADDING, cy=panelY+TOP_H+10, maxY=panelY+panelH-10;
-        for(Module m: tabs.get(activeTab).modules){
-            int h=cardHeight(m); if(cy+h>maxY) break;
-            if(mx>=cx&&mx<=cx+CARD_W&&my>=cy&&my<=cy+CARD_HEADER_H){ m.toggle(); return true; }
-            int sy=cy+CARD_HEADER_H+4; if(handleSettings(m,mx,my,cx,sy,dir)) return true;
+        int dir=(button==0)?1:-1;
+        int cx=panelX+PADDING, top=contentTop(), bottom=contentBottom();
+        double cy=top-scroll;
+        for(Module m: visibleModules()){
+            int h=cardHeight(m);
+            if (cy + h >= top && cy <= bottom && my >= top && my <= bottom) {
+                if(mx>=cx&&mx<=cx+CARD_W&&my>=cy&&my<=cy+CARD_HEADER_H){ m.toggle(); return true; }
+                int syRow=(int)cy+CARD_HEADER_H+4; if(handleSettings(m,mx,my,cx,syRow,dir)) return true;
+            }
             cy+=h+8;
         }
         return super.mouseClicked(event,isDoubleClick);
+    }
+
+    @Override
+    public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
+        int top=contentTop(), bottom=contentBottom();
+        if (mouseX >= panelX && mouseX <= panelX+panelW && mouseY >= top && mouseY <= bottom) {
+            scroll -= verticalAmount * 18.0;
+            clampScroll();
+            return true;
+        }
+        return super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
+    }
+
+    @Override
+    public boolean charTyped(char chr, int modifiers) {
+        if (searchFocused) {
+            if (chr >= 32 && chr != 127 && search.length() < 32) {
+                search += chr; clampScroll(); return true;
+            }
+        }
+        return super.charTyped(chr, modifiers);
+    }
+
+    @Override
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        if (searchFocused) {
+            if (keyCode == 259) { if (!search.isEmpty()) { search = search.substring(0, search.length()-1); clampScroll(); } return true; }
+            if (keyCode == 256) { searchFocused=false; return true; }
+            if (keyCode == 257 || keyCode == 335) { searchFocused=false; return true; }
+            return true;
+        }
+        return super.keyPressed(keyCode, scanCode, modifiers);
     }
 
     private boolean handleSettings(Module m,double mx,double my,int cx,int sy,int dir){
