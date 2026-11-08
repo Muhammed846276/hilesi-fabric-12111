@@ -106,7 +106,7 @@ public class ClickGuiScreen extends Screen {
         ctx.fill(panelX, panelY + 2, panelX + panelW, panelY + 3, ACCENT);
         ctx.text(this.font, "HILESI MENU", panelX + 16, panelY + 12, TXT, true);
         ctx.text(this.font, "Sag Shift: kapat | X: XRay | Tekerlek: kaydir", panelX + 16, panelY + 26, DIM, true);
-        String ver = "v0.1.28+26.1.2  |  26.1.2  Fabric";
+        String ver = "v0.1.30+26.1.2.2.2  |  26.1.2  Fabric";
         ctx.text(this.font, ver, panelX + panelW - this.font.width(ver) - 14, panelY + 18, MUTED, true);
         drawTabs(ctx, mouseX, mouseY);
         drawSearch(ctx, mouseX, mouseY);

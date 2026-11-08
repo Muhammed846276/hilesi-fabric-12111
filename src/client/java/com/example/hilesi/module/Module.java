@@ -4,37 +4,32 @@ import net.minecraft.client.Minecraft;
 
 public abstract class Module {
     private final String name;
+    private final String description;
     private boolean enabled;
+    private int bind = -1; // GLFW key, -1 = none
 
-    protected Module(String name) {
+    protected Module(String name) { this(name, ""); }
+    protected Module(String name, String description) {
         this.name = name;
+        this.description = description == null ? "" : description;
     }
 
-    public String getName() {
-        return name;
-    }
+    public String getName() { return name; }
+    public String getDescription() { return description; }
+    public boolean isEnabled() { return enabled; }
+    public int getBind() { return bind; }
+    public void setBind(int bind) { this.bind = bind; }
 
-    public boolean isEnabled() {
-        return enabled;
-    }
-
-    public void toggle() {
-        setEnabled(!enabled);
-    }
+    public void toggle() { setEnabled(!enabled); }
 
     public void setEnabled(boolean enabled) {
         if (this.enabled == enabled) return;
         this.enabled = enabled;
-        if (enabled) {
-            onEnable();
-        } else {
-            onDisable();
-        }
+        if (enabled) onEnable(); else onDisable();
+        try { com.example.hilesi.util.Config.save(); } catch (Throwable ignored) {}
     }
 
     protected void onEnable() {}
-
     protected void onDisable() {}
-
     public void onTick(Minecraft client) {}
 }
