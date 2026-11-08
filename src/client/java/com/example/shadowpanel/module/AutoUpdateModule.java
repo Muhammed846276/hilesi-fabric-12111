@@ -6,6 +6,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 
 import java.io.InputStream;
+import java.lang.reflect.Method;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -30,9 +31,40 @@ public class AutoUpdateModule extends Module {
         String msg = pending;
         if (msg != null && mc != null && mc.player != null) {
             pending = null;
-            try { mc.player.displayClientMessage(Component.literal(msg), false); }
-            catch (Throwable t) { try { mc.gui.getChat().addMessage(Component.literal(msg)); } catch (Throwable ignored) {} }
+            chat(mc, msg);
         }
+    }
+
+    private void chat(Minecraft mc, String msg) {
+        try {
+            Object comp = Component.literal(msg);
+            // try common player message methods via reflection (mapping-safe)
+            Object player = mc.player;
+            for (Method m : player.getClass().getMethods()) {
+                String n = m.getName();
+                if (!(n.equals("displayClientMessage") || n.equals("sendSystemMessage") || n.equals("sendMessage"))) continue;
+                Class<?>[] p = m.getParameterTypes();
+                try {
+                    if (p.length == 2 && p[1] == boolean.class) { m.invoke(player, comp, false); return; }
+                    if (p.length == 1) { m.invoke(player, comp); return; }
+                } catch (Throwable ignored) {}
+            }
+            // chat gui fallback
+            try {
+                Object gui = mc.gui;
+                for (Method gm : gui.getClass().getMethods()) {
+                    if (!gm.getName().toLowerCase().contains("chat")) continue;
+                    if (gm.getParameterCount()!=0) continue;
+                    Object chat = gm.invoke(gui);
+                    if (chat == null) continue;
+                    for (Method cm : chat.getClass().getMethods()) {
+                        if (!cm.getName().toLowerCase().contains("add") && !cm.getName().toLowerCase().contains("message")) continue;
+                        try { if (cm.getParameterCount()==1) { cm.invoke(chat, comp); return; } } catch (Throwable ignored) {}
+                    }
+                }
+            } catch (Throwable ignored) {}
+        } catch (Throwable ignored) {}
+        ShadowPanelClient.LOGGER.info("[ShadowPanel] {}", msg);
     }
 
     private void checkAsync() {
@@ -51,7 +83,6 @@ public class AutoUpdateModule extends Module {
         HttpResponse<String> res = http.send(req, HttpResponse.BodyHandlers.ofString());
         if (res.statusCode()!=200) { ShadowPanelClient.LOGGER.info("AutoUpdate HTTP {}", res.statusCode()); return; }
         String json = res.body();
-        // find newest release for this MC version
         Pattern tagP = Pattern.compile("\\{[^\\{]*?\"tag_name\"\\s*:\\s*\"([^\"]+)\"[^\\{]*?\"assets\"\\s*:\\[(.*?)\\]", Pattern.DOTALL);
         Matcher tm = tagP.matcher(json);
         String bestTag=null, bestMod=null, bestUrl=null;
@@ -80,37 +111,14 @@ public class AutoUpdateModule extends Module {
         pending = "[ShadowPanel] Guncellendi -> " + fileName + " indirildi. Eski jar'i silip oyunu yeniden baslat.";
     }
 
-    private static String normalizeMc(String mc){ if(mc==null) return ""; // keep dots (1.21.11) as-is
-        return mc.trim(); }
-    private static boolean matchesMc(String tag, String mcVer){
-        if (tag==null) return false;
-        String n = normalizeMc(mcVer);
-        if (n.isEmpty()) return true;
-        return tag.contains("+"+n) || tag.endsWith(n);
-    }
-    private static String modPart(String v){
-        if (v==null) return "0.0.0";
-        String s = v.startsWith("v")?v.substring(1):v;
-        int p = s.indexOf('+'); return p>=0 ? s.substring(0,p) : s;
-    }
+    private static String normalizeMc(String mc){ return mc==null?"":mc.trim(); }
+    private static boolean matchesMc(String tag, String mcVer){ if (tag==null) return false; String n=normalizeMc(mcVer); if(n.isEmpty()) return true; return tag.contains("+"+n)||tag.endsWith(n); }
+    private static String modPart(String v){ if(v==null) return "0.0.0"; String s=v.startsWith("v")?v.substring(1):v; int p=s.indexOf('+'); return p>=0?s.substring(0,p):s; }
     private static String findAsset(String assetsJson, String mcVer){
-        Pattern p = Pattern.compile("\"browser_download_url\"\\s*:\\s*\"([^\"]+)\"");
-        Matcher m = p.matcher(assetsJson);
-        String nmc = normalizeMc(mcVer);
-        while (m.find()){
-            String u = m.group(1);
-            if (u.contains("-sources")) continue;
-            if (!u.contains("shadowpanel-")) continue;
-            if (nmc.isEmpty() || u.contains("+"+nmc)) return u;
-        }
+        Pattern p = Pattern.compile("\"browser_download_url\"\\s*:\\s*\"([^\"]+)\""); Matcher m=p.matcher(assetsJson); String nmc=normalizeMc(mcVer);
+        while(m.find()){ String u=m.group(1); if(u.contains("-sources")) continue; if(!u.contains("shadowpanel-")) continue; if(nmc.isEmpty()||u.contains("+"+nmc)) return u; }
         return null;
     }
-    private static boolean newer(String a,String b){
-        try {
-            int[] A=parse(a), B=parse(b);
-            for(int i=0;i<Math.max(A.length,B.length);i++){ int av=i<A.length?A[i]:0,bv=i<B.length?B[i]:0; if(av!=bv) return av>bv; }
-            return false;
-        } catch(Exception e){ return !a.equals(b); }
-    }
+    private static boolean newer(String a,String b){ try{ int[] A=parse(a),B=parse(b); for(int i=0;i<Math.max(A.length,B.length);i++){ int av=i<A.length?A[i]:0,bv=i<B.length?B[i]:0; if(av!=bv) return av>bv; } return false; } catch(Exception e){ return !a.equals(b);} }
     private static int[] parse(String v){ String[] p=v.split("[^0-9]+"); int[] o=new int[p.length]; int n=0; for(String x:p) if(!x.isEmpty()) o[n++]=Integer.parseInt(x); int[] r=new int[n]; System.arraycopy(o,0,r,0,n); return r; }
 }
