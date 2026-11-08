@@ -2,27 +2,61 @@ name: Build Fabric Mod
 
 on:
   push:
+    branches: [ "master", "main" ]
   pull_request:
   workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
           java-version: '21'
           distribution: 'temurin'
+
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '9.2.1'
+
+      - name: Read version
+        id: ver
+        run: |
+          VER=$(grep '^mod_version=' gradle.properties | cut -d'=' -f2 | tr -d '\r')
+          echo "ver=$VER" >> "$GITHUB_OUTPUT"
+          echo "version=$VER"
+
       - name: Build
         run: gradle build --no-daemon -x test
+
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: hilesi-jar
           path: build/libs/*.jar
+
+      - name: Publish Release
+        if: github.event_name == 'push'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          VER="${{ steps.ver.outputs.ver }}"
+          TAG="v${VER}"
+          JAR="build/libs/hilesi-${VER}.jar"
+          if [ ! -f "$JAR" ]; then
+            echo "Jar not found: $JAR"
+            ls -la build/libs || true
+            exit 1
+          fi
+          gh release delete "$TAG" -y --repo "$GITHUB_REPOSITORY" || true
+          gh release create "$TAG" "$JAR" \
+            --repo "$GITHUB_REPOSITORY" \
+            --title "Hilesi ${TAG}" \
+            --notes "Otomatik surum: ${TAG} (1.21.11 Fabric). mods klasorune koyup oyunu yeniden baslat."

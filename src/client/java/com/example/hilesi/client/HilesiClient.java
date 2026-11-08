@@ -23,8 +23,9 @@ public class HilesiClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         try {
-            LOGGER.info("Hilesi yukleniyor (v0.1.18)...");
+            LOGGER.info("Hilesi yukleniyor (v0.1.19)...");
             ModuleManager.init();
+            UpdateChecker.checkAsync();
 
             openMenuKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
                     "key.hilesi.open_menu",
@@ -35,6 +36,7 @@ public class HilesiClient implements ClientModInitializer {
 
             ClientTickEvents.END_CLIENT_TICK.register(client -> {
                 try {
+                    UpdateChecker.tickShowMessage(client);
                     if (openMenuKey != null) {
                         while (openMenuKey.wasPressed()) {
                             if (client.currentScreen == null) {
@@ -46,7 +48,6 @@ public class HilesiClient implements ClientModInitializer {
                     }
                     ModuleManager.onTick(client);
                 } catch (Throwable t) {
-                    // Modtick'teki tek bir hatada oyunu crash'leme
                     LOGGER.error("Hilesi tick hatasi", t);
                 }
             });
