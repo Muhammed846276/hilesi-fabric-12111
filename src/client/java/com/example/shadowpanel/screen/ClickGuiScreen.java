@@ -1,11 +1,10 @@
 package com.example.shadowpanel.screen;
 
 import com.example.shadowpanel.module.*;
+import com.example.shadowpanel.module.Module;
+import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.input.CharInput;
-import net.minecraft.client.input.Click;
-import net.minecraft.client.input.KeyInput;
 import net.minecraft.text.Text;
 import org.lwjgl.glfw.GLFW;
 
@@ -310,7 +309,7 @@ public class ClickGuiScreen extends Screen {
     }
 
     @Override
-    public boolean keyPressed(KeyInput input) {
+    public boolean keyPressed(net.minecraft.client.input.KeyInput input) {
         int k = keyOf(input);
         if (binding != null) {
             if (k==256) { binding=null; return true; }
@@ -328,7 +327,7 @@ public class ClickGuiScreen extends Screen {
     }
 
     @Override
-    public boolean charTyped(CharInput input) {
+    public boolean charTyped(net.minecraft.client.input.CharInput input) {
         if (searchFocus) {
             int cp = cpOf(input);
             if (cp>=32 && cp!=127 && search.length()<40) { search += new String(Character.toChars(cp)); clampScroll(); return true; }
